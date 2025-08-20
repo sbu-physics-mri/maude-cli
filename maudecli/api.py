@@ -1,6 +1,12 @@
 """Query the MAUDE database via the openfda API."""
 
+# Typing
 from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
 
 # Python imports
 import json
@@ -51,35 +57,43 @@ def _validate_search_terms(
 
 def fetch_results(
         *terms: Iterable[str] | str,
+        exclude_terms: Sequence[Sequence[str]] | None = None,
         search_fields: Iterable[str] | str = "mdr_text.text",
         base_endpoint: str = "https://api.fda.gov/device/event.json",
         max_pages: int = 0,
         limit: int = 1000,
         sort: None | str = None,
 ) -> list[dict]:
-    """Fetch the query from the endpoint.
+    """Fetch and filter query results from the endpoint.
 
     Args:
-        terms : List of terms to search. If multiple keyword lists
-            or strings are provided then there the results will contain
-            on match from EACH of the terms. That is, terms of
-            ["MRI, "magnet"], ["stapes", "grommet"] will return matches
-            that contain one of "MRI" or "magnet"
-            AND one of "stapes" or "grommet".
-        search_fields : The fields to search for a keyword match.
+        terms : Term groups to search. If multiple groups are provided,
+            results must contain at least one match from EACH group.
+            Example: ["MRI", "magnet"], ["stapes", "grommet"] returns matches
+            containing ("MRI" OR "magnet") AND ("stapes" OR "grommet").
+        exclude_terms : Term groups to exclude. Results containing matches
+            from ALL exclude groups will be filtered out. Within each group,
+            terms are OR'd together. Example: ["artifact", "shadow"],
+            ["metal", "screw"] will exclude results containing
+            ("artifact" OR "shadow") AND ("metal" OR "screw").
+        search_fields : The fields to search for keyword matches.
                 Can be a list of fields or a single field.
                 Defaults to "mdr_text.text".
-        base_endpoint : The base_endpoint to construct the query.
+        base_endpoint : The base endpoint to construct the query.
                 Defaults to "https://api.fda.gov/device/event.json".
-        max_pages : Number of pages to return. If 0 (default),
-                will return all pages.
-        limit : Limit the number of results returned in a single query.
+        max_pages : Maximum number of pages to return. If 0 (default),
+                will return all available pages.
+        limit : Maximum number of results per query page.
             Defaults to 1000.
-        sort : Sort criteria. Defaults to None.
-
+        sort : Sort criteria for results. Defaults to None.
 
     Returns:
-        results : A list of dictionaries of the JSON results.
+        results : A list of dictionaries containing the filtered JSON results.
+
+    Note:
+        Exclusion filtering happens during result fetching (not post-processing),
+        making it memory efficient. The API doesn't support negative matching
+        natively, so this implementation filters results after retrieval.
 
     """
     keywords = _validate_search_terms(terms)
@@ -110,8 +124,10 @@ def fetch_results(
             with urllib.request.urlopen(url) as response:
                 data = json.loads(response.read().decode())
 
-                if data["results"]:
-                    results += data["results"]
+                if fr := filter_results(
+                    data["results"], exclude_terms=exclude_terms, field=sf,
+                ):
+                    results += fr
                 pages += 1
 
                 logger.info(
@@ -121,7 +137,7 @@ def fetch_results(
                     "requests" if pages > 1 else "request",
                 )
                 meta = data["meta"]
-                if max_pages and pages >= max_pages:
+                if len(results) >= limit or (max_pages and pages >= max_pages):
                     logger.warning(
                         "Maximum pages recieved (%i) exiting...", pages,
                     )
@@ -139,3 +155,37 @@ def fetch_results(
             logger.info("All results retrieved with search field %s", sf)
     logger.info("Query returned with the following meta data: %s", meta)
     return results
+
+
+def _get_item_text(item: dict | list, field: str) -> list[str]:
+    if not isinstance(item, list):
+        item = [item]
+
+    next_field, *rest = field.split(".")
+
+    for obj in item:
+        if rest:
+            yield from _get_item_text(obj[next_field], ".".join(rest))
+        else:
+            yield obj[next_field]
+
+
+def filter_results(
+    results: Sequence[dict],
+    exclude_terms: Sequence[Sequence[str]] | None,
+    field: str,
+) -> list[dict]:
+    """Remove results that contain excluded terms in the field."""
+    if exclude_terms is None or not exclude_terms:
+        return results
+
+    return [
+        r for r in results
+        if all(
+            all(
+                term.lower() not in " ".join(_get_item_text(r, field)).lower()
+                for term in terms
+            )
+            for terms in exclude_terms
+        )
+    ]

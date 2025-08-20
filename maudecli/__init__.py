@@ -31,6 +31,14 @@ def main() -> None:
         ),
     )
     parser.add_argument(
+        "-x", "--exclude",
+        nargs="+",
+        help=(
+            "Term groups to exclude (comma-separated terms OR'd within groups, "
+            "groups AND'd together). Example: 'ARTIFACT,SHADOW' 'METAL,SCREW'"
+        ),
+    )
+    parser.add_argument(
         "-f", "--search-fields",
         default="mdr_text.text",
         help="Fields to search (default: mdr_text.text)",
@@ -81,10 +89,16 @@ def main() -> None:
 
     # Process term groups into lists
     terms = [group.split(",") for group in args.term_groups]
+    exclude_terms = (
+        [group.split(",") for group in args.exclude]
+        if args.exclude
+        else None
+    )
 
     # Fetch results
     results = fetch_results(
         *terms,
+        exclude_terms=exclude_terms,
         search_fields=args.search_fields,
         max_pages=args.max_pages,
         limit=args.limit,
