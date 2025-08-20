@@ -101,6 +101,11 @@ def fetch_results(
 
         while url:
             logger.debug("Sending request to %s", url)
+            if not url.startswith(("http:", "https:")):
+                msg = "URL must start with 'http:' or 'https:'"
+                logger.critical("%s but got %s", msg, url)
+                raise ValueError(msg)
+
             with urllib.request.urlopen(url) as response:
                 data = json.loads(response.read().decode())
 
