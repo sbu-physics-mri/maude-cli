@@ -11,3 +11,8 @@ maude-cli = "maudecli:main"
 
 [tool.uv]
 package = true
+
+[dependency-groups]
+dev = [
+    "ty>=0.0.1a19",
+]

@@ -11,7 +11,6 @@ from typing import Iterable
 # Local imports
 from maudecli.errors import CantConvertToStringError
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -28,7 +27,9 @@ def construct_url(
     return f"{base_url}:{encoded_query}&limit={limit}" + sort
 
 
-def _validate_search_terms(terms: Iterable[str] | str) -> list[str]:
+def _validate_search_terms(
+        terms: tuple[Iterable[str] | str, ...],
+) -> list[list[str]]:
     keywords = []
     for idx, kw in enumerate(terms):
         if isinstance(kw, str):
@@ -95,7 +96,7 @@ def fetch_results(
         query = "+AND+".join(
             f"({'+OR+'.join(kw)})" for kw in keywords
         )
-        url = construct_url(
+        url: str | None = construct_url(
             base_url, query, limit=limit, sort=sort,
         )
 

@@ -1,6 +1,7 @@
 # MAUDE CLI
 
-Command-line interface for searching the MAUDE (Manufacturer and User Facility Device Experience) database through the openFDA API. Search medical device adverse event reports directly from your terminal.
+Command-line interface, written in pure Python, for searching the MAUDE (Manufacturer and User Facility Device Experience) database through the openFDA API.
+Search medical device adverse event reports directly from your terminal.
 
 
 ## Installation

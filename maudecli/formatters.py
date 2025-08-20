@@ -6,13 +6,16 @@ from __future__ import annotations
 import csv
 import logging
 import re
+from collections.abc import Sequence
 from io import StringIO
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
-def _format(k: str, v: str  | dict | list, root: str = "") -> str:
-    # Try v is a dictionary
+def _format(
+    k: str, v: str | dict[str, Any] | list[str], root: str = "",
+) -> str:
     logger.debug(
         "Formatting %s with root %s and value %s (type=%s)",
         k,
@@ -24,17 +27,25 @@ def _format(k: str, v: str  | dict | list, root: str = "") -> str:
     if isinstance(v, str):
         return f"\n:{_root}: {v}"
 
-    try:
+    # Explicitly check types instead of using try/except
+    if isinstance(v, dict):
         return "".join(
             _format(_k, _v, root=_root)
             for _k, _v in v.items()
         )
-    # Try v as a list
-    except AttributeError:
+
+    if isinstance(v, Sequence):
         return "".join(
             _format(k, item, root=root + f"_{i}" if i else root)
             for i, item in enumerate(v)
         )
+
+    msg = f"Unsupported type: {type(v)}"
+    logger.critical(
+        "%s. Supported types are str, dict and Sequence",
+        msg,
+    )
+    raise TypeError(msg)
 
 
 def as_org(
@@ -86,10 +97,10 @@ def as_csv(results: list[dict], fields: list | None = None) -> str:
 
     # Determine headers
     if fields is None:
-        headers = set()
+        h: set[str] = set()
         for r in results:
-            headers.update(r.keys())
-        headers = sorted(headers)
+            h.update(r.keys())
+        headers = sorted(h)
     else:
         headers = fields
 
