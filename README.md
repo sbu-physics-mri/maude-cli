@@ -38,6 +38,7 @@ maude-cli "MRI,MAGNET" "STAPES,TYMP"
 -   `-l, --limit`: Results per page (default: 1000)
 -   `-s, --sort`: Sort criteria
 -   `-o, --format`: Output format (`org`, `json`, or `text`; default: `org`)
+-   `-O, --output`: Output file. If not used then will print to standard out.
 -   `-n, --name`: Field to use as item name (default: `report_number`)
 -   `-F, --fields`: Comma-separated fields to include in output
 -   `-L, --level`: Org heading level (default: 3)
