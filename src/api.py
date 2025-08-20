@@ -5,9 +5,7 @@ from __future__ import annotations
 # Python imports
 import json
 import logging
-import requests
-import urllib
-from pathlib import Path
+import urllib.request
 from typing import Iterable
 
 # Local imports
@@ -98,7 +96,7 @@ def fetch_results(
             f"({'+OR+'.join(kw)})" for kw in keywords
         )
         url = construct_url(
-            base_url, query, limit, sort=sort,
+            base_url, query, limit=limit, sort=sort,
         )
 
         while url:
