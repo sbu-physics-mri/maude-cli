@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import json
 import unittest
+import urllib
 from typing import Any
 from unittest import mock
 
@@ -31,10 +32,13 @@ class TestURLConstruction(unittest.TestCase):
         Verifies that a simple URL with query term and limit is properly formatted.
         """
         url: str = api.construct_url(
-            "https://api.fda.gov/device/event.json", "mdr_text.text:mri", limit=100,
+            "https://api.fda.gov/device/event.json",
+            "mdr_text.text:mri",
+            limit=100,
         )
         self.assertEqual(
-            url, "https://api.fda.gov/device/event.json:mdr_text.text:mri&limit=100",
+            url,
+            "https://api.fda.gov/device/event.json:mdr_text.text:mri&limit=100",
         )
 
     def test_url_with_sort(self) -> None:
@@ -150,7 +154,9 @@ class TestResultsFiltering(unittest.TestCase):
         """
         results: list[dict[str, Any]] = [{"mdr_text": {"text": "MRI report"}}]
         filtered: list[dict[str, Any]] = api.filter_results(
-            results, None, "mdr_text.text",
+            results,
+            None,
+            "mdr_text.text",
         )
         self.assertEqual(filtered, results)
 
@@ -164,7 +170,9 @@ class TestResultsFiltering(unittest.TestCase):
             {"mdr_text": {"text": "Artifact in MRI"}},
         ]
         filtered: list[dict[str, Any]] = api.filter_results(
-            results, [["artifact"]], "mdr_text.text",
+            results,
+            [["artifact"]],
+            "mdr_text.text",
         )
         self.assertEqual(len(filtered), 1)
         self.assertEqual(filtered[0]["mdr_text"]["text"], "MRI report")
@@ -183,7 +191,9 @@ class TestResultsFiltering(unittest.TestCase):
         ]
         # Exclude items with BOTH "artifact" AND "metal"
         filtered: list[dict[str, Any]] = api.filter_results(
-            results, [["artifact"], ["metal"]], "mdr_text.text",
+            results,
+            [["artifact"], ["metal"]],
+            "mdr_text.text",
         )
         self.assertEqual(len(filtered), 1)
         texts: list[str] = [r["mdr_text"]["text"] for r in filtered]
@@ -199,7 +209,9 @@ class TestResultsFiltering(unittest.TestCase):
             {"mdr_text": {"text": "ARTIFACT in MRI"}},
         ]
         filtered: list[dict[str, Any]] = api.filter_results(
-            results, [["artifact"]], "mdr_text.text",
+            results,
+            [["artifact"]],
+            "mdr_text.text",
         )
         self.assertEqual(len(filtered), 1)
         self.assertEqual(filtered[0]["mdr_text"]["text"], "MRI report")
@@ -214,7 +226,9 @@ class TestResultsFiltering(unittest.TestCase):
             {"device": {"brand_name": "MRI Safe Device"}},
         ]
         filtered: list[dict[str, Any]] = api.filter_results(
-            results, [["mri"]], "device.brand_name",
+            results,
+            [["mri"]],
+            "device.brand_name",
         )
         self.assertEqual(len(filtered), 1)
         self.assertEqual(filtered[0]["device"]["brand_name"], "Pacemaker X")
@@ -325,12 +339,90 @@ class TestAPIIntegration(unittest.TestCase):
 
         # Call the function with exclusion
         results: list[dict[str, Any]] = api.fetch_results(
-            ["mri"], exclude_terms=[["artifact"], ["metal"]],
+            ["mri"],
+            exclude_terms=[["artifact"], ["metal"]],
         )
 
         # Should exclude R124 (has artifact) and R125 (has artifact AND metal)
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]["report_number"], "R123")
+
+
+class TestAPIErrorHandling(unittest.TestCase):
+    """Test suite for API error handling functionality."""
+
+    @mock.patch("urllib.request.urlopen")
+    def test_rate_limit_error(self, mock_urlopen: mock.MagicMock) -> None:
+        """Test handling of API rate limit errors (HTTP 429)."""
+        # Mock rate limit response
+        mock_response = mock.Mock()
+        mock_response.status = 429
+        mock_response.read.return_value = json.dumps(
+            {"error": {"code": "429", "message": "Rate limit exceeded"}},
+        ).encode("utf-8")
+        mock_response.getheader.return_value = None
+        mock_urlopen.side_effect = urllib.error.HTTPError(
+            "url", 429, "Rate limit", None, None,
+        )
+
+        with self.assertRaises(api.APIRateLimitError):
+            api.fetch_results(["test"])
+
+    @mock.patch("urllib.request.urlopen")
+    def test_invalid_search_field(self) -> None:
+        """Test validation of search fields before making API calls."""
+        with self.assertRaises(errors.InvalidSearchFieldError) as context:
+            api.fetch_results(["test"], search_fields="invalid.field")
+
+        self.assertEqual(
+            str(context.exception), "Invalid search field: 'invalid.field'",
+        )
+
+    @mock.patch("urllib.request.urlopen")
+    def test_api_error_response(self, mock_urlopen: mock.MagicMock) -> None:
+        """Test handling of API error responses with error messages."""
+        # Mock API error response
+        mock_response = mock.Mock()
+        mock_response.status = 400
+        mock_response.read.return_value = json.dumps(
+            {"error": {"code": "400", "message": "Invalid query parameter"}},
+        ).encode("utf-8")
+        mock_urlopen.side_effect = urllib.error.HTTPError(
+            "url", 400, "Bad Request", None, None,
+        )
+
+        with self.assertRaises(api.APIResponseError) as context:
+            api.fetch_results(["test"])
+
+        self.assertEqual(
+            str(context.exception), "API returned error 400: Invalid query parameter",
+        )
+
+    @mock.patch("urllib.request.urlopen")
+    def test_network_error(self, mock_urlopen: mock.MagicMock) -> None:
+        """Test handling of network connection errors."""
+        # Mock network failure
+        mock_urlopen.side_effect = urllib.error.URLError("Connection refused")
+
+        with self.assertRaises(api.APIConnectionError) as context:
+            api.fetch_results(["test"])
+
+        self.assertEqual(
+            str(context.exception), "Failed to connect to API: Connection refused",
+        )
+
+    @mock.patch("urllib.request.urlopen")
+    def test_invalid_json_response(self, mock_urlopen: mock.MagicMock) -> None:
+        """Test handling of invalid JSON responses from API."""
+        # Mock invalid JSON response
+        mock_response = mock.Mock()
+        mock_response.read.return_value = b"Not JSON data"
+        mock_urlopen.return_value.__enter__.return_value = mock_response
+
+        with self.assertRaises(api.APIResponseError) as context:
+            api.fetch_results(["test"])
+
+        self.assertIn("Invalid JSON response", str(context.exception))
 
 
 if __name__ == "__main__":
