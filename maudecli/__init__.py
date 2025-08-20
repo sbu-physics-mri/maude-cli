@@ -9,7 +9,7 @@ import sys
 
 # Local imports
 from maudecli.api import fetch_results
-from maudecli.formatters import as_org
+from maudecli.formatters import as_csv, as_org
 
 
 def main() -> None:
@@ -49,7 +49,7 @@ def main() -> None:
     parser.add_argument(
         "-o", "--format",
         default="org",
-        choices=["org", "json", "text"],
+        choices=["org", "json", "csv", "text"],
         help="Output format (default: org)",
     )
     parser.add_argument(
@@ -88,6 +88,8 @@ def main() -> None:
         print(as_org(results, name=args.name, fields=fields, level=args.level))
     elif args.format == "json":
         print(json.dumps(results, indent=2))
+    elif args.format == "csv":
+        print(as_csv(results, fields=fields))
     else:  # text
         for i, r in enumerate(results, 1):
             print(f"Result {i}:")

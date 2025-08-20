@@ -14,13 +14,13 @@ uvx maude-cli
 or pip:
 
 ```sh
-  pip install maude-cli
+pip install maude-cli
 ```
 
 ## Usage
 
 ```sh
-  maude-cli [OPTIONS] TERM_GROUPS...
+maude-cli [OPTIONS] TERM_GROUPS...
 ```
 
 ### Basic Example
@@ -28,7 +28,7 @@ or pip:
 Search for reports containing either `"MRI"` or `"MAGNET"` AND either `"STAPES"` or `"TYMP"`:
 
 ```sh
-  maude-cli "MRI,MAGNET" "STAPES,TYMP"
+maude-cli "MRI,MAGNET" "STAPES,TYMP"
 ```
 
 ### Options
@@ -48,6 +48,7 @@ Search for reports containing either `"MRI"` or `"MAGNET"` AND either `"STAPES"`
 -   `org`: Org-mode formatted output (default)
 -   `json`: Pretty-printed JSON
 -   `text`: Simple text format
+-   `csv` : CSV format.
 
 
 
@@ -56,11 +57,11 @@ Search for reports containing either `"MRI"` or `"MAGNET"` AND either `"STAPES"`
 Search with specific fields and output format:
 
 ```
-    maude-cli "pacemaker" -f device.device_name -o json -F device.brand_name,patient.age
+maude-cli "pacemaker" -f device.device_name -o json -F device.brand_name,patient.age
 ```
 
 Search with pagination control:
 
 ```
-    maude-cli "defibrillator" -p 2 -l 50
+maude-cli "defibrillator" -p 2 -l 50
 ```

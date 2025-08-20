@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 # Python imports
+import csv
 import logging
+from io import StringIO
 
 logger = logging.getLogger(__name__)
 
@@ -64,3 +66,40 @@ def as_org(
             out += _format(k, v)
     out += "\n:END:\n"
   return out
+
+
+def as_csv(results: list[dict], fields: list | None = None) -> str:
+    """Format the response as CSV.
+
+    Args:
+        results: A list of results dictionaries from the JSON API output.
+        fields: A subset of fields to include. If None (default) then will
+            include all fields found in the first result.
+
+    Returns:
+        out: Formatted CSV string.
+
+    """
+    if not results:
+        return ""
+
+    # Determine headers
+    if fields is None:
+        headers = set()
+        for r in results:
+            headers.update(r.keys())
+        headers = sorted(headers)
+    else:
+        headers = fields
+
+    # Create CSV in memory
+    output = StringIO()
+    writer = csv.DictWriter(output, fieldnames=headers)
+
+    writer.writeheader()
+    for r in results:
+        # Filter to only include specified fields
+        row = {k: v for k, v in r.items() if k in headers}
+        writer.writerow(row)
+
+    return output.getvalue()
