@@ -66,3 +66,14 @@ Search with pagination control:
 ```
 maude-cli "defibrillator" -p 2 -l 50
 ```
+
+Search for all entries that contain either "MRI" or "MAGNET" AND also containing either "CARDIAC" or "VALVE" and output as a csv file.
+
+```
+maude-cli "mri,magnet" "cardiac,valve" -o csv
+```
+
+
+## License
+
+This code is licensed under the GNU GPL v3 license which can be found [here](LICENSE).
