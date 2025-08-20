@@ -9,7 +9,7 @@ import urllib.request
 from typing import Iterable
 
 # Local imports
-from src.errors import CantConvertToStringError
+from maudecli.errors import CantConvertToStringError
 
 
 logger = logging.getLogger(__name__)

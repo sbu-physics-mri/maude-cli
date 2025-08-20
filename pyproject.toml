@@ -5,3 +5,9 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = []
+
+[project.scripts]
+maude-cli = "maudecli:main"
+
+[tool.uv]
+package = true
