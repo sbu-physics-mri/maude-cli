@@ -15,7 +15,8 @@ import urllib.request
 from typing import Iterable
 
 # Local imports
-from maudecli.errors import CantConvertToStringError
+from maudecli.errors import (APIConnectionError, APIRateLimitError,
+                             APIResponseError, CantConvertToStringError)
 
 logger = logging.getLogger(__name__)
 
@@ -121,36 +122,70 @@ def fetch_results(
                 logger.critical("%s but got %s", msg, url)
                 raise ValueError(msg)
 
-            with urllib.request.urlopen(url) as response:
-                data = json.loads(response.read().decode())
+            try:
 
-                if fr := filter_results(
-                    data["results"], exclude_terms=exclude_terms, field=sf,
-                ):
-                    results += fr
-                pages += 1
+                with urllib.request.urlopen(url) as response:
+                    data = json.loads(response.read().decode())
 
-                logger.info(
-                    "Devices found: %i (%i %s)",
-                    len(results),
-                    pages,
-                    "requests" if pages > 1 else "request",
-                )
-                meta = data["meta"]
-                if len(results) >= limit or (max_pages and pages >= max_pages):
-                    logger.warning(
-                        "Maximum pages recieved (%i) exiting...", pages,
+                    if "error" in data:
+                        error_msg = data["error"].get(
+                            "message", "Unknown API error",
+                        )
+                        raise APIResponseError(response.status, error_msg)
+
+                    if fr := filter_results(
+                        data["results"], exclude_terms=exclude_terms, field=sf,
+                    ):
+                        results += fr
+                    pages += 1
+
+                    logger.info(
+                        "Devices found: %i (%i %s)",
+                        len(results),
+                        pages,
+                        "requests" if pages > 1 else "request",
                     )
-                    break
+                    meta = data["meta"]
+                    if len(results) >= limit or (max_pages and pages >= max_pages):
+                        logger.warning(
+                            "Maximum pages recieved (%i) exiting...", pages,
+                        )
+                        break
 
-                link_header = response.getheader("Link")
-                if link_header:
-                    start = link_header.find("<") + 1
-                    end = link_header.find(">")
-                    url = link_header[start:end]
-                else:
-                    url = None
-                logger.debug("Next link found? %s", bool(url))
+                    link_header = response.getheader("Link")
+                    if link_header:
+                        start = link_header.find("<") + 1
+                        end = link_header.find(">")
+                        url = link_header[start:end]
+                    else:
+                        url = None
+                    logger.debug("Next link found? %s", bool(url))
+
+            except urllib.error.HTTPError as e:
+                # Handle specific HTTP errors
+                if e.code == 429:       # noqa: PLR2004
+                    # Check for rate limit reset header
+                    reset = e.headers.get("X-RateLimit-Reset")
+                    reset_time = int(reset) if reset else None
+                    raise APIRateLimitError(reset_time) from e
+                error_msg = "Unknown error"
+                try:
+                    error_data = json.loads(e.read().decode())
+                    error_msg = error_data.get("error", {}).get("message", error_msg)
+                except Exception:
+                    logger.exception()
+                raise APIResponseError(e.code, error_msg) from e
+
+            except urllib.error.URLError as e:
+                raise APIConnectionError(str(e.reason)) from e
+
+            except json.JSONDecodeError as e:
+                raise APIResponseError(
+                    200, f"Invalid JSON response: {e}",
+                ) from e
+            except Exception:
+                logger.exception("Unexpected error during API request")
+                raise
         else:
             logger.info("All results retrieved with search field %s", sf)
     logger.info("Query returned with the following meta data: %s", meta)
