@@ -5,6 +5,7 @@ from __future__ import annotations
 # Python imports
 import csv
 import logging
+import re
 from io import StringIO
 
 logger = logging.getLogger(__name__)
@@ -102,4 +103,4 @@ def as_csv(results: list[dict], fields: list | None = None) -> str:
         row = {k: v for k, v in r.items() if k in headers}
         writer.writerow(row)
 
-    return output.getvalue()
+    return re.sub("\r", "", output.getvalue())

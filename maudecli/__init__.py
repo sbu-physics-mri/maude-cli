@@ -5,11 +5,16 @@
 # Python imports
 import argparse
 import json
+import logging
 import sys
+from pathlib import Path
 
 # Local imports
 from maudecli.api import fetch_results
 from maudecli.formatters import as_csv, as_org
+
+logger = logging.getLogger(__name__)
+
 
 
 def main() -> None:
@@ -53,6 +58,10 @@ def main() -> None:
         help="Output format (default: org)",
     )
     parser.add_argument(
+        "-O", "--output",
+        help="Output file (default: stdout)",
+    )
+    parser.add_argument(
         "-n", "--name",
         default="report_number",
         help="Field to use as item name (default: report_number)",
@@ -82,20 +91,45 @@ def main() -> None:
         sort=args.sort,
     )
 
+    output = Path(args.output) if isinstance(args.output, str) else args.output
+    if output and args.format != output.suffix[1:]:
+        logger.error(
+            "Format (%s) does not match file format (%s) setting format to %s",
+            args.format,
+            output.suffix[1:],
+            output.suffix[1:],
+        )
+        args.format = output.suffix[1:]
+
     # Format output
     fields = args.fields.split(",") if args.fields else None
-    if args.format == "org":
-        print(as_org(results, name=args.name, fields=fields, level=args.level))
-    elif args.format == "json":
-        print(json.dumps(results, indent=2))
-    elif args.format == "csv":
-        print(as_csv(results, fields=fields))
-    else:  # text
-        for i, r in enumerate(results, 1):
-            print(f"Result {i}:")
-            for k, v in r.items():
-                if fields is None or k in fields:
-                    print(f"  {k}: {v}")
+    match args.format:
+        case "org":
+            output_str = as_org(
+                results, name=args.name, fields=fields, level=args.level,
+            )
+        case "json":
+            output_str = json.dumps(results, indent=2)
+        case "csv":
+            output_str = as_csv(results, fields=fields)
+        case _: # Text
+            output_str = ""
+            for i, r in enumerate(results, 1):
+                output_str += f"\nResult {i}:"
+                for k, v in r.items():
+                    if fields is None or k in fields:
+                        output_str += f"\n  {k}: {v}"
+
+    # Ensure consistent trailing newline
+    if output_str and not output_str.endswith("\n"):
+        output_str += "\n"
+
+    # Handle output destination
+    try:
+        with output.open("w") as fp:
+            fp.write(output_str)
+    except AttributeError:
+        print(output_str, end="")
 
 if __name__ == "__main__":
     sys.exit(main())
