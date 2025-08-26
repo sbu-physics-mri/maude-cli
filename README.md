@@ -4,6 +4,23 @@ Command-line interface, written in pure Python, for searching the MAUDE (Manufac
 Search medical device adverse event reports directly from your terminal.
 
 
+### Features
+
+- Command-line interface for searching the [MAUDE database](https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfMAUDE/search.cfm) via the [openFDA API](https://open.fda.gov/apis/try-the-api/).
+- Flexible term syntax: multiple groups combined with `AND`, terms within a group combined with `OR`.
+- Exclusion filtering with the same logical syntax as search terms.
+- Customizable search fields (default: `mdr_text.text`).
+- Pagination control: specify maximum pages and results per page.
+- Optional sorting of results using openFDA sort criteria.
+- Multiple output formats: Org-mode, JSON, CSV, and plain text.
+- Ability to select specific fields for output and define the item name field.
+- Configurable Org-mode heading level for hierarchical reports.
+- Direct file output with automatic format validation against file extension.
+- Graceful handling of stdout when no output file is specified.
+- Comprehensive logging for error reporting and debugging.
+- Fully type-annotated, lint-clean code base ready for extension or integration.
+
+
 ## Installation
 
 With uv:
