@@ -213,7 +213,7 @@ def filter_results(
 ) -> list[dict]:
     """Remove results that contain excluded terms in the field."""
     if exclude_terms is None or not exclude_terms:
-        return results
+        return list(results)
 
     return [
         r for r in results
