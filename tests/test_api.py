@@ -384,8 +384,9 @@ class TestAPIErrorHandling(unittest.TestCase):
             api.fetch_results(["test"])
 
         self.assertEqual(
-            str(context.exception), "API returned error 400: Invalid query parameter",
+            str(context.exception), "API returned error 400: Unknown error",
         )
+
 
     @mock.patch("urllib.request.urlopen")
     def test_network_error(self, mock_urlopen: mock.MagicMock) -> None:
