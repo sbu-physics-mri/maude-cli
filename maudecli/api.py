@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 import json
 import logging
 import urllib.request
-from typing import Iterable
+from typing import Iterable, Generator
 
 # Local imports
 from maudecli.errors import (APIConnectionError, APIRateLimitError,
@@ -192,7 +192,7 @@ def fetch_results(
     return results
 
 
-def _get_item_text(item: dict | list, field: str) -> list[str]:
+def _get_item_text(item: dict | list, field: str) -> Generator[str, None, None]:
     if not isinstance(item, list):
         item = [item]
 
