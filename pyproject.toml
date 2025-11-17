@@ -4,7 +4,9 @@ version = "0.1.1"
 description = "Command-line interface to search MAUDE database for medical device adverse events via openFDA API"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "pyyaml>=6.0.2",
+]
 
 [project.scripts]
 maude-cli = "maudecli:main"

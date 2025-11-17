@@ -16,7 +16,9 @@ from typing import Iterable
 
 # Local imports
 from maudecli.errors import (APIConnectionError, APIRateLimitError,
-                             APIResponseError, CantConvertToStringError)
+                             APIResponseError, CantConvertToStringError,
+                             InvalidSearchFieldError)
+from maudecli.fields import get_searchable_fields, validate_search_fields
 
 logger = logging.getLogger(__name__)
 
@@ -103,6 +105,14 @@ def fetch_results(
         if isinstance(search_fields, str)
         else search_fields
     )
+
+    # First validation attempt with cached fields
+    try:
+        validate_search_fields(search_fields)
+    except InvalidSearchFieldError as e:
+        # Try refreshing cache and validating again
+        get_searchable_fields(force_refresh=True)
+        validate_search_fields(search_fields)
 
     results = []
     pages = 0
