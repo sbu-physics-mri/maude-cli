@@ -163,6 +163,7 @@ def fetch_results(
 
             except urllib.error.HTTPError as e:
                 # Handle specific HTTP errors
+                logger.debug(e)
                 if e.code == 429:       # noqa: PLR2004
                     # Check for rate limit reset header
                     reset = e.headers.get("X-RateLimit-Reset")
@@ -173,7 +174,7 @@ def fetch_results(
                     error_data = json.loads(e.read().decode())
                     error_msg = error_data.get("error", {}).get("message", error_msg)
                 except Exception:
-                    logger.exception()
+                    logger.exception(error_msg)
                 raise APIResponseError(e.code, error_msg) from e
 
             except urllib.error.URLError as e:
