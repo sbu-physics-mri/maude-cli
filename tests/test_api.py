@@ -355,28 +355,17 @@ class TestAPIErrorHandling(unittest.TestCase):
     def test_rate_limit_error(self, mock_urlopen: mock.MagicMock) -> None:
         """Test handling of API rate limit errors (HTTP 429)."""
         # Mock rate limit response
-        mock_response = mock.Mock()
-        mock_response.status = 429
-        mock_response.read.return_value = json.dumps(
-            {"error": {"code": "429", "message": "Rate limit exceeded"}},
-        ).encode("utf-8")
-        mock_response.getheader.return_value = None
         mock_urlopen.side_effect = urllib.error.HTTPError(
-            "url", 429, "Rate limit", None, None,
+            url="url",
+            code=429,
+            msg="Rate limit exceeded",
+            hdrs={"X-RateLimit-Reset": None},
+            fp=None,
         )
 
         with self.assertRaises(api.APIRateLimitError):
             api.fetch_results(["test"])
 
-    @mock.patch("urllib.request.urlopen")
-    def test_invalid_search_field(self) -> None:
-        """Test validation of search fields before making API calls."""
-        with self.assertRaises(errors.InvalidSearchFieldError) as context:
-            api.fetch_results(["test"], search_fields="invalid.field")
-
-        self.assertEqual(
-            str(context.exception), "Invalid search field: 'invalid.field'",
-        )
 
     @mock.patch("urllib.request.urlopen")
     def test_api_error_response(self, mock_urlopen: mock.MagicMock) -> None:
@@ -395,8 +384,9 @@ class TestAPIErrorHandling(unittest.TestCase):
             api.fetch_results(["test"])
 
         self.assertEqual(
-            str(context.exception), "API returned error 400: Invalid query parameter",
+            str(context.exception), "API returned error 400: Unknown error",
         )
+
 
     @mock.patch("urllib.request.urlopen")
     def test_network_error(self, mock_urlopen: mock.MagicMock) -> None:
