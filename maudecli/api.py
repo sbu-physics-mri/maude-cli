@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 import json
 import logging
 import urllib.request
-from typing import Iterable
+from typing import Iterable, Generator
 
 # Local imports
 from maudecli.errors import (APIConnectionError, APIRateLimitError,
@@ -173,6 +173,7 @@ def fetch_results(
 
             except urllib.error.HTTPError as e:
                 # Handle specific HTTP errors
+                logger.debug(e)
                 if e.code == 429:       # noqa: PLR2004
                     # Check for rate limit reset header
                     reset = e.headers.get("X-RateLimit-Reset")
@@ -183,7 +184,7 @@ def fetch_results(
                     error_data = json.loads(e.read().decode())
                     error_msg = error_data.get("error", {}).get("message", error_msg)
                 except Exception:
-                    logger.exception()
+                    logger.exception(error_msg)
                 raise APIResponseError(e.code, error_msg) from e
 
             except urllib.error.URLError as e:
@@ -202,7 +203,7 @@ def fetch_results(
     return results
 
 
-def _get_item_text(item: dict | list, field: str) -> list[str]:
+def _get_item_text(item: dict | list, field: str) -> Generator[str, None, None]:
     if not isinstance(item, list):
         item = [item]
 
@@ -222,7 +223,7 @@ def filter_results(
 ) -> list[dict]:
     """Remove results that contain excluded terms in the field."""
     if exclude_terms is None or not exclude_terms:
-        return results
+        return list(results)
 
     return [
         r for r in results
