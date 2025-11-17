@@ -3,6 +3,8 @@
 Command-line interface, written in pure Python, for searching the MAUDE (Manufacturer and User Facility Device Experience) database through the openFDA API.
 Search medical device adverse event reports directly from your terminal.
 
+*Note: The openFDA API is updated weekly and does not cover incidents before 2009!*
+
 
 ### Features
 
