@@ -355,14 +355,12 @@ class TestAPIErrorHandling(unittest.TestCase):
     def test_rate_limit_error(self, mock_urlopen: mock.MagicMock) -> None:
         """Test handling of API rate limit errors (HTTP 429)."""
         # Mock rate limit response
-        mock_response = mock.Mock()
-        mock_response.status = 429
-        mock_response.read.return_value = json.dumps(
-            {"error": {"code": "429", "message": "Rate limit exceeded"}},
-        ).encode("utf-8")
-        mock_response.getheader.return_value = None
         mock_urlopen.side_effect = urllib.error.HTTPError(
-            "url", 429, "Rate limit", None, None,
+            url="url",
+            code=429,
+            msg="Rate limit exceeded",
+            hdrs={"X-RateLimit-Reset": None},
+            fp=None,
         )
 
         with self.assertRaises(api.APIRateLimitError):
