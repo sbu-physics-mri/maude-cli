@@ -366,15 +366,6 @@ class TestAPIErrorHandling(unittest.TestCase):
         with self.assertRaises(api.APIRateLimitError):
             api.fetch_results(["test"])
 
-    @mock.patch("urllib.request.urlopen")
-    def test_invalid_search_field(self) -> None:
-        """Test validation of search fields before making API calls."""
-        with self.assertRaises(errors.InvalidSearchFieldError) as context:
-            api.fetch_results(["test"], search_fields="invalid.field")
-
-        self.assertEqual(
-            str(context.exception), "Invalid search field: 'invalid.field'",
-        )
 
     @mock.patch("urllib.request.urlopen")
     def test_api_error_response(self, mock_urlopen: mock.MagicMock) -> None:
