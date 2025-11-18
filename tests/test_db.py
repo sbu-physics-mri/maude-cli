@@ -19,6 +19,9 @@ class TestDatabaseQueries(unittest.TestCase):
         self.temp_db_path = Path(self.temp_db.name)
         self.temp_db.close()
         
+        # Ensure cleanup happens even if test fails
+        self.addCleanup(self.temp_db_path.unlink, missing_ok=True)
+        
         # Patch DB_PATH to use temp database
         self.original_db_path = db.DB_PATH
         db.DB_PATH = self.temp_db_path

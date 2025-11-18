@@ -7,8 +7,6 @@ a SQLite database at maudecli/resources/historical-incidents.sqlite3.
 The process is idempotent - re-running on the same files will not create duplicates.
 """
 
-# ruff: noqa: S608
-
 from __future__ import annotations
 
 # Python imports
@@ -178,10 +176,15 @@ def add_columns_if_needed(
         columns: List of column names to add.
 
     """
+    # Validate table name against whitelist
+    VALID_TABLES = {"device", "foitext", "foidev"}
+    if table_name not in VALID_TABLES:
+        raise ValueError(f"Invalid table name: {table_name}")
+    
     cursor = conn.cursor()
 
-    # Get existing columns
-    cursor.execute(f"PRAGMA table_info({table_name})")
+    # Get existing columns (table_name is validated above)
+    cursor.execute(f"PRAGMA table_info({table_name})")  # noqa: S608
     existing_columns = {row[1] for row in cursor.fetchall()}
 
     # Add missing columns
@@ -196,8 +199,9 @@ def add_columns_if_needed(
                     safe_col,
                 )
             try:
+                # table_name is validated, safe_col is sanitized
                 cursor.execute(
-                    f"ALTER TABLE {table_name} ADD COLUMN [{safe_col}] TEXT",
+                    f"ALTER TABLE {table_name} ADD COLUMN [{safe_col}] TEXT",  # noqa: S608
                 )
                 logger.debug(
                     "Added column '%s' to table '%s'",
@@ -229,6 +233,11 @@ def ingest_file(
         Number of rows ingested.
 
     """
+    # Validate record_type against whitelist
+    VALID_RECORD_TYPES = {"device", "foitext", "foidev"}
+    if record_type not in VALID_RECORD_TYPES:
+        raise ValueError(f"Invalid record type: {record_type}")
+    
     logger.info(
         "Processing %s as %s",
         file_path.name,
@@ -292,9 +301,9 @@ def ingest_file(
     # Compute row hashes
     df["row_hash"] = df.apply(compute_row_hash, axis=1)
 
-    # Get existing row hashes to avoid duplicates
+    # Get existing row hashes to avoid duplicates (record_type is validated above)
     cursor = conn.cursor()
-    cursor.execute(f"SELECT row_hash FROM {record_type}")
+    cursor.execute(f"SELECT row_hash FROM {record_type}")  # noqa: S608
     existing_hashes = {row[0] for row in cursor.fetchall()}
 
     # Filter out rows that already exist
@@ -434,8 +443,9 @@ def build_database() -> None:
 
         # Print table statistics
         cursor = conn.cursor()
-        for table in ["device", "foitext", "foidev"]:
-            cursor.execute(f"SELECT COUNT(*) FROM {table}")
+        VALID_TABLES = ["device", "foitext", "foidev"]
+        for table in VALID_TABLES:
+            cursor.execute(f"SELECT COUNT(*) FROM {table}")  # noqa: S608
             count = cursor.fetchone()[0]
             logger.info("Table '%s': %s rows", table, count)
 

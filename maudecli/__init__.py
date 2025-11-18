@@ -116,8 +116,33 @@ def main() -> None:
             "mdr_text.text": "foi_text",
             "device.device_name": "generic_name",
             "device.brand_name": "brand_name",
+            "device.generic_name": "generic_name",
+            "device.manufacturer_d_name": "manufacturer_d_name",
+            "device.model_number": "model_number",
+            "device.catalog_number": "catalog_number",
+            "device.lot_number": "lot_number",
+            "device.other_id_number": "other_id_number",
+            "device.expiration_date_of_device": "expiration_date_of_device",
+            "device.implant_flag": "implant_flag",
+            "device.date_removed_flag": "date_removed_flag",
+            "device.date_received": "date_received",
+            "device.date_returned_to_manufacturer": "date_returned_to_manufacturer",
+            "device.device_report_product_code": "device_report_product_code",
+            "device.device_event_key": "device_event_key",
+            "device.device_sequence_no": "device_sequence_no",
+            "device.device_age_text": "device_age_text",
+            "device.device_evaluated_by_manufactur": "device_evaluated_by_manufactur",
         }
-        local_field = field_mapping.get(search_field, search_field.split(".")[-1])
+        if search_field in field_mapping:
+            local_field = field_mapping[search_field]
+        else:
+            local_field = search_field.split(".")[-1]
+            logger.warning(
+                "Search field '%s' not explicitly mapped to local database field. "
+                "Falling back to '%s'. Please check if this matches your local schema.",
+                search_field,
+                local_field,
+            )
         
         local_results = query_local_database(
             terms,
@@ -132,8 +157,8 @@ def main() -> None:
             logger.info("No results found in local database")
     else:
         logger.info(
-            "Local database not found, skipping historical data query"
-            " The local database is required to query results pre-2009!",
+            "Local database not found, skipping historical data query. "
+            "The local database is required to query results pre-2009!"
         )
 
     output = Path(args.output) if isinstance(args.output, str) else args.output

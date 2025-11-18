@@ -47,7 +47,18 @@ def query_local_database(
         logger.warning(f"Local database not found at {DB_PATH}")
         return []
     
+    # Validate limit parameter
+    if limit is not None and (not isinstance(limit, int) or limit < 0):
+        raise ValueError(f"Invalid limit: {limit}")
+    
+    # Validate search_field format to prevent SQL injection
+    import re
+    if not re.match(r'^[a-zA-Z_][a-zA-Z0-9_]*$', search_field):
+        logger.error(f"Invalid search field name format: {search_field}")
+        return []
+    
     # Determine which table(s) to query based on search field
+    VALID_TABLES = ["device", "foitext", "foidev"]
     tables = []
     if search_field in ["foi_text", "mdr_text_key", "text_type_code"]:
         tables.append("foitext")
@@ -56,75 +67,79 @@ def query_local_database(
         tables.extend(["device", "foidev"])
     else:
         # Default: search all tables
-        tables.extend(["device", "foitext", "foidev"])
+        tables.extend(VALID_TABLES)
     
     results = []
     
     try:
-        conn = sqlite3.connect(DB_PATH)
-        conn.row_factory = sqlite3.Row  # Return rows as dictionaries
-        cursor = conn.cursor()
-        
-        for table in tables:
-            # Check if the field exists in this table
-            cursor.execute(f"PRAGMA table_info({table})")
-            columns = {row[1] for row in cursor.fetchall()}
+        with sqlite3.connect(DB_PATH) as conn:
+            conn.row_factory = sqlite3.Row  # Return rows as dictionaries
+            cursor = conn.cursor()
             
-            if search_field not in columns:
-                logger.debug(f"Field '{search_field}' not in table '{table}', skipping")
-                continue
-            
-            # Build WHERE clause for search terms
-            # Each group is OR'd internally, groups are AND'd together
-            where_clauses = []
-            params = []
-            
-            for group in search_terms:
-                group_conditions = []
-                for term in group:
-                    group_conditions.append(f"{search_field} LIKE ?")
-                    params.append(f"%{term}%")
-                if group_conditions:
-                    where_clauses.append(f"({' OR '.join(group_conditions)})")
-            
-            where_sql = " AND ".join(where_clauses) if where_clauses else "1=1"
-            
-            # Build query
-            query = f"SELECT * FROM {table} WHERE {where_sql}"
-            if limit:
-                query += f" LIMIT {limit}"
-            
-            logger.debug(f"Executing query on {table}: {query}")
-            cursor.execute(query, params)
-            
-            # Fetch results and convert to dicts
-            for row in cursor.fetchall():
-                result_dict = dict(row)
+            for table in tables:
+                # Validate table name against whitelist
+                if table not in VALID_TABLES:
+                    logger.warning(f"Invalid table name: {table}")
+                    continue
                 
-                # Apply exclusion filtering in Python (simpler than complex SQL)
-                if exclude_terms:
-                    should_exclude = True
-                    for exclude_group in exclude_terms:
-                        # Check if ANY term in this group matches
-                        group_matches = False
-                        for term in exclude_group:
-                            field_value = str(result_dict.get(search_field, "")).lower()
-                            if term.lower() in field_value:
-                                group_matches = True
-                                break
-                        # If this group doesn't match, don't exclude
-                        if not group_matches:
-                            should_exclude = False
-                            break
+                # Check if the field exists in this table (table is validated, safe)
+                cursor.execute(f"PRAGMA table_info({table})")  # noqa: S608
+                columns = {row[1] for row in cursor.fetchall()}
+                
+                if search_field not in columns:
+                    logger.debug(f"Field '{search_field}' not in table '{table}', skipping")
+                    continue
+                
+                # Build WHERE clause for search terms
+                # Each group is OR'd internally, groups are AND'd together
+                where_clauses = []
+                params = []
+                
+                for group in search_terms:
+                    group_conditions = []
+                    for term in group:
+                        group_conditions.append(f"{search_field} LIKE ?")
+                        params.append(f"%{term}%")
+                    if group_conditions:
+                        # search_field is validated via regex, params are parameterized
+                        where_clauses.append(f"({' OR '.join(group_conditions)})")  # noqa: S608
+                
+                where_sql = " AND ".join(where_clauses) if where_clauses else "1=1"
+                
+                # Build query (table and search_field are validated, params are parameterized)
+                query = f"SELECT * FROM {table} WHERE {where_sql}"  # noqa: S608
+                if limit:
+                    query += f" LIMIT {limit}"  # noqa: S608
+                
+                logger.debug(f"Executing query on {table}: {query}")
+                cursor.execute(query, params)
+                
+                # Fetch results and convert to dicts
+                for row in cursor.fetchall():
+                    result_dict = dict(row)
                     
-                    if should_exclude:
-                        continue
-                
-                # Add table source for debugging
-                result_dict["_source"] = f"local_db:{table}"
-                results.append(result_dict)
-        
-        conn.close()
+                    # Apply exclusion filtering in Python (simpler than complex SQL)
+                    if exclude_terms:
+                        should_exclude = True
+                        for exclude_group in exclude_terms:
+                            # Check if ANY term in this group matches
+                            group_matches = False
+                            for term in exclude_group:
+                                field_value = str(result_dict.get(search_field, "")).lower()
+                                if term.lower() in field_value:
+                                    group_matches = True
+                                    break
+                            # If this group doesn't match, don't exclude
+                            if not group_matches:
+                                should_exclude = False
+                                break
+                        
+                        if should_exclude:
+                            continue
+                    
+                    # Add table source for debugging
+                    result_dict["_source"] = f"local_db:{table}"
+                    results.append(result_dict)
         
     except Exception as e:
         logger.error(f"Error querying local database: {e}", exc_info=True)
@@ -143,12 +158,13 @@ def get_table_stats() -> dict[str, int]:
         return {}
     
     stats = {}
+    VALID_TABLES = ["device", "foitext", "foidev"]
     try:
         with sqlite3.connect(DB_PATH) as conn:
             cursor = conn.cursor()
             
-            for table in ["device", "foitext", "foidev"]:
-                cursor.execute(f"SELECT COUNT(*) FROM {table}")
+            for table in VALID_TABLES:
+                cursor.execute(f"SELECT COUNT(*) FROM {table}")  # noqa: S608
                 count = cursor.fetchone()[0]
                 stats[table] = count
             
