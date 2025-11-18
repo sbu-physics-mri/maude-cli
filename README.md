@@ -163,7 +163,7 @@ maude-cli "infusion,pump" -x "SOFTWARE,ALGORITHM" "BAXTER" "NO INJURY,"
 
 The CLI supports querying a local SQLite database containing historical MAUDE data from before 2009. The openFDA API only includes data from 2009 onwards, but the local database provides access to ~2.6 million historical incident reports.
 
-The package ships with pre-built local database, for information on building the database from the data files [see here](DATABASE_USAGE.md).
+The package ships with a pre-built local database, for information on building the database from the data files [see here](DATABASE_USAGE.md).
 
 
 ### Automatic Query Integration
