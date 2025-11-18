@@ -278,12 +278,10 @@ class TestAPIIntegration(unittest.TestCase):
     the API, processes responses, and applies filtering logic.
     """
 
-    @mock.patch("maudecli.fields.get_searchable_fields")
     @mock.patch("urllib.request.urlopen")
     def test_fetch_results(
         self,
         mock_urlopen: mock.MagicMock,
-        mock_get_fields: mock.MagicMock,
     ) -> None:
         """Test basic fetch_results functionality with mocked API response.
 
@@ -291,7 +289,6 @@ class TestAPIIntegration(unittest.TestCase):
 
         Args:
             mock_urlopen: Mocked urllib.request.urlopen function
-            mock_get_fields: Mocked get_searchable_fields function
 
         """
         # Mock API response
@@ -307,9 +304,6 @@ class TestAPIIntegration(unittest.TestCase):
         ).encode("utf-8")
         mock_urlopen.return_value.__enter__.return_value = mock_response
 
-        # Mock searchable fields
-        mock_get_fields.return_value = ["mdr_text.text", "report_number"]
-
         # Call the function
         results: list[dict[str, Any]] = api.fetch_results(["mri"], limit=1)
 
@@ -318,12 +312,10 @@ class TestAPIIntegration(unittest.TestCase):
         self.assertEqual(results[0]["report_number"], "R123")
         self.assertEqual(results[0]["mdr_text"]["text"], "MRI report")
 
-    @mock.patch("maudecli.fields.get_searchable_fields")
     @mock.patch("urllib.request.urlopen")
     def test_fetch_results_with_exclusion(
         self,
         mock_urlopen: mock.MagicMock,
-        mock_get_fields: mock.MagicMock,
     ) -> None:
         """Test fetch_results with exclusion terms.
 
@@ -331,7 +323,6 @@ class TestAPIIntegration(unittest.TestCase):
 
         Args:
             mock_urlopen: Mocked urllib.request.urlopen function
-            mock_get_fields: Mocked get_searchable_fields function
 
         """
         # Mock API response
@@ -352,9 +343,6 @@ class TestAPIIntegration(unittest.TestCase):
         ).encode("utf-8")
         mock_urlopen.return_value.__enter__.return_value = mock_response
 
-        # Mock searchable fields
-        mock_get_fields.return_value = ["mdr_text.text", "report_number"]
-
         # Call the function with exclusion
         results: list[dict[str, Any]] = api.fetch_results(
             ["mri"],
@@ -369,7 +357,6 @@ class TestAPIIntegration(unittest.TestCase):
 class TestAPIErrorHandling(unittest.TestCase):
     """Test suite for API error handling functionality."""
 
-    @mock.patch("maudecli.fields.get_searchable_fields")
     @mock.patch("urllib.request.urlopen")
     def test_rate_limit_error(
         self,
@@ -393,12 +380,10 @@ class TestAPIErrorHandling(unittest.TestCase):
             api.fetch_results(["test"])
 
 
-    @mock.patch("maudecli.fields.get_searchable_fields")
     @mock.patch("urllib.request.urlopen")
     def test_api_error_response(
         self,
         mock_urlopen: mock.MagicMock,
-        mock_get_fields: mock.MagicMock,
     ) -> None:
         """Test handling of API error responses with error messages."""
         # Mock API error response
@@ -410,9 +395,6 @@ class TestAPIErrorHandling(unittest.TestCase):
         mock_urlopen.side_effect = urllib.error.HTTPError(
             "url", 400, "Bad Request", None, None,
         )
-
-        # Mock searchable fields
-        mock_get_fields.return_value = ["mdr_text.text", "report_number"]
 
         with self.assertRaises(api.APIResponseError) as context:
             api.fetch_results(["test"])
@@ -426,14 +408,10 @@ class TestAPIErrorHandling(unittest.TestCase):
     def test_network_error(
         self,
         mock_urlopen: mock.MagicMock,
-        mock_get_fields: mock.MagicMock,
     ) -> None:
         """Test handling of network connection errors."""
         # Mock network failure
         mock_urlopen.side_effect = urllib.error.URLError("Connection refused")
-
-        # Mock searchable fields
-        mock_get_fields.return_value = ["mdr_text.text", "report_number"]
 
         with self.assertRaises(api.APIConnectionError) as context:
             api.fetch_results(["test"])
@@ -442,21 +420,16 @@ class TestAPIErrorHandling(unittest.TestCase):
             str(context.exception), "Failed to connect to API: Connection refused",
         )
 
-    @mock.patch("maudecli.fields.get_searchable_fields")
     @mock.patch("urllib.request.urlopen")
     def test_invalid_json_response(
         self,
         mock_urlopen: mock.MagicMock,
-        mock_get_fields: mock.MagicMock,
     ) -> None:
         """Test handling of invalid JSON responses from API."""
         # Mock invalid JSON response
         mock_response = mock.Mock()
         mock_response.read.return_value = b"Not JSON data"
         mock_urlopen.return_value.__enter__.return_value = mock_response
-
-        # Mock searchable fields
-        mock_get_fields.return_value = ["mdr_text.text", "report_number"]
 
         with self.assertRaises(api.APIResponseError) as context:
             api.fetch_results(["test"])
