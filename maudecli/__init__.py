@@ -131,7 +131,10 @@ def main() -> None:
         else:
             logger.info("No results found in local database")
     else:
-        logger.info("Local database not found, skipping historical data query")
+        logger.info(
+            "Local database not found, skipping historical data query"
+            " The local database is required to query results pre-2009!",
+        )
 
     output = Path(args.output) if isinstance(args.output, str) else args.output
     if output and args.format != output.suffix[1:]:
