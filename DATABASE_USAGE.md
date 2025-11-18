@@ -6,7 +6,7 @@ The local SQLite database is built from historical MAUDE CSV/ZIP files stored in
 
 ```bash
 # Build or update the database
-python3 data/build.py
+uv run python data/build.py
 ```
 
 The script is idempotent - running it multiple times will not create duplicate rows. It will only process files that have changed or new files.
