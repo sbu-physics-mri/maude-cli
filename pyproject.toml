@@ -5,8 +5,6 @@ description = "Command-line interface to search MAUDE database for medical devic
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "pyyaml>=6.0.2",
-    "pandas>=2.0.0",
 ]
 
 [project.scripts]
@@ -15,8 +13,19 @@ maude-cli = "maudecli:main"
 [tool.uv]
 package = true
 
+[build-system]
+requires = ["uv_build>=0.9.9,<0.10.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "maudecli"
+module-root = ""
+
 [dependency-groups]
 dev = [
+    "mypy>=1.18.2",
+    "pandas>=2.3.3",
+    "pandas-stubs>=2.3.2.250926",
     "pytest>=8.4.1",
     "ty>=0.0.1a19",
 ]
