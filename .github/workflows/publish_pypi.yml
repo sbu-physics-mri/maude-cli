@@ -47,7 +47,7 @@ jobs:
        sed -i "s/^name = .*/name = \"${repo_name}\"/" pyproject.toml
 
     - name: Build the database for historical incidents
-      run: uv python data/build.py
+      run: uv run python data/build.py
 
     - name: Build package
       run: uv build
