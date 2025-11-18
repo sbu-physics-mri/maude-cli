@@ -1,3 +1,4 @@
 *~
 **/maude_cli.egg-info/*
 **/__pycache__/*
+maudecli/resources/historical-incidents.sqlite3

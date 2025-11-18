@@ -11,6 +11,7 @@ from pathlib import Path
 
 # Local imports
 from maudecli.api import fetch_results
+from maudecli.db import query_local_database, database_exists
 from maudecli.formatters import as_csv, as_org
 
 logger = logging.getLogger(__name__)
@@ -95,7 +96,7 @@ def main() -> None:
         else None
     )
 
-    # Fetch results
+    # Fetch results from API
     results = fetch_results(
         *terms,
         exclude_terms=exclude_terms,
@@ -104,6 +105,36 @@ def main() -> None:
         limit=args.limit,
         sort=args.sort,
     )
+
+    # Also query local database for pre-2009 data if available
+    if database_exists():
+        logger.info("Querying local database for historical data...")
+        # Use the first search field for local DB query
+        search_field = args.search_fields.split(",")[0] if "," in args.search_fields else args.search_fields
+        # Map common API field names to local DB field names
+        field_mapping = {
+            "mdr_text.text": "foi_text",
+            "device.device_name": "generic_name",
+            "device.brand_name": "brand_name",
+        }
+        local_field = field_mapping.get(search_field, search_field.split(".")[-1])
+        
+        local_results = query_local_database(
+            terms,
+            exclude_terms=exclude_terms,
+            search_field=local_field,
+            limit=args.limit if args.max_pages == 1 else None,
+        )
+        if local_results:
+            logger.info(f"Found {len(local_results)} results in local database")
+            results.extend(local_results)
+        else:
+            logger.info("No results found in local database")
+    else:
+        logger.info(
+            "Local database not found, skipping historical data query"
+            " The local database is required to query results pre-2009!",
+        )
 
     output = Path(args.output) if isinstance(args.output, str) else args.output
     if output and args.format != output.suffix[1:]:
