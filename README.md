@@ -1,14 +1,15 @@
 # MAUDE CLI
 
-Command-line interface, written in pure Python, for searching the MAUDE (Manufacturer and User Facility Device Experience) database through the openFDA API.
+Command-line interface, written in pure Python, for searching the MAUDE (Manufacturer and User Facility Device Experience) database through the openFDA API and local historical data.
 Search medical device adverse event reports directly from your terminal.
 
-*Note: The openFDA API is updated weekly and does not cover incidents before 2009!*
+*Note: The openFDA API is updated weekly but does not cover incidents before 2009. This CLI includes support for querying a local SQLite database of historical pre-2009 data!*
 
 
 ### Features
 
 - Command-line interface for searching the [MAUDE database](https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfMAUDE/search.cfm) via the [openFDA API](https://open.fda.gov/apis/try-the-api/).
+- **Local database support for historical pre-2009 data** not available through the API (~2.6M records).
 - Flexible term syntax: multiple groups combined with `AND`, terms within a group combined with `OR`.
 - Exclusion filtering with the same logical syntax as search terms.
 - Customizable search fields (default: `mdr_text.text`).
@@ -157,6 +158,38 @@ Search for infusion pump issues but exclude:
 ```
 maude-cli "infusion,pump" -x "SOFTWARE,ALGORITHM" "BAXTER" "NO INJURY,"
 ```
+
+## Local Historical Database
+
+The CLI supports querying a local SQLite database containing historical MAUDE data from before 2009. The openFDA API only includes data from 2009 onwards, but the local database provides access to ~2.6 million historical incident reports.
+
+### Building the Database
+
+To build the local database from the historical data files in the `data/` directory:
+
+```bash
+python3 data/build.py
+```
+
+This creates a SQLite database at `maudecli/resources/historical-incidents.sqlite3` containing:
+- **928,973** device records (2000-2008)
+- **1,460,898** text records (pre-2009)
+- **252,592** FOI device records (1997-1998)
+
+The build process is idempotent - running it multiple times will not create duplicates.
+
+### Automatic Query Integration
+
+When the local database exists, the CLI automatically queries both the API and the local database, combining results:
+
+```bash
+# Searches both API (2009+) and local DB (pre-2009)
+maude-cli "MRI" "pacemaker"
+```
+
+No additional flags are needed - the integration is transparent to the user.
+
+For more details on database usage, see [DATABASE_USAGE.md](DATABASE_USAGE.md).
 
 
 ## License
