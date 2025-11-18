@@ -38,7 +38,7 @@ class TestURLConstruction(unittest.TestCase):
         )
         self.assertEqual(
             url,
-            "https://api.fda.gov/device/event.json?search=mdr_text.text:mri&limit=100",
+            "https://api.fda.gov/device/event.json:mdr_text.text:mri&limit=100",
         )
 
     def test_url_with_sort(self) -> None:
@@ -54,7 +54,7 @@ class TestURLConstruction(unittest.TestCase):
         )
         self.assertEqual(
             url,
-            "https://api.fda.gov/device/event.json?search=mdr_text.text:mri&limit=100&sort=report_date:desc",
+            "https://api.fda.gov/device/event.json:mdr_text.text:mri&limit=100&sort=report_date:desc",
         )
 
     def test_url_with_spaces(self) -> None:
@@ -69,7 +69,7 @@ class TestURLConstruction(unittest.TestCase):
         )
         self.assertEqual(
             url,
-            "https://api.fda.gov/device/event.json?search=mdr_text.text:mri+machine&limit=100",
+            "https://api.fda.gov/device/event.json:mdr_text.text:mri+machine&limit=100",
         )
 
 
@@ -361,7 +361,6 @@ class TestAPIErrorHandling(unittest.TestCase):
     def test_rate_limit_error(
         self,
         mock_urlopen: mock.MagicMock,
-        mock_get_fields: mock.MagicMock,
     ) -> None:
         """Test handling of API rate limit errors (HTTP 429)."""
         # Mock rate limit response
@@ -372,9 +371,6 @@ class TestAPIErrorHandling(unittest.TestCase):
             hdrs={"X-RateLimit-Reset": None},
             fp=None,
         )
-
-        # Mock searchable fields
-        mock_get_fields.return_value = ["mdr_text.text", "report_number"]
 
         with self.assertRaises(api.APIRateLimitError):
             api.fetch_results(["test"])
