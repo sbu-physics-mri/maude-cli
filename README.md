@@ -163,20 +163,8 @@ maude-cli "infusion,pump" -x "SOFTWARE,ALGORITHM" "BAXTER" "NO INJURY,"
 
 The CLI supports querying a local SQLite database containing historical MAUDE data from before 2009. The openFDA API only includes data from 2009 onwards, but the local database provides access to ~2.6 million historical incident reports.
 
-### Building the Database
+The package ships with pre-built local database, for information on building the database from the data files [see here](DATABASE_USAGE.md).
 
-To build the local database from the historical data files in the `data/` directory:
-
-```bash
-python3 data/build.py
-```
-
-This creates a SQLite database at `maudecli/resources/historical-incidents.sqlite3` containing:
-- **928,973** device records (2000-2008)
-- **1,460,898** text records (pre-2009)
-- **252,592** FOI device records (1997-1998)
-
-The build process is idempotent - running it multiple times will not create duplicates.
 
 ### Automatic Query Integration
 
