@@ -144,15 +144,14 @@ def get_table_stats() -> dict[str, int]:
     
     stats = {}
     try:
-        conn = sqlite3.connect(DB_PATH)
-        cursor = conn.cursor()
-        
-        for table in ["device", "foitext", "foidev"]:
-            cursor.execute(f"SELECT COUNT(*) FROM {table}")
-            count = cursor.fetchone()[0]
-            stats[table] = count
-        
-        conn.close()
+        with sqlite3.connect(DB_PATH) as conn:
+            cursor = conn.cursor()
+            
+            for table in ["device", "foitext", "foidev"]:
+                cursor.execute(f"SELECT COUNT(*) FROM {table}")
+                count = cursor.fetchone()[0]
+                stats[table] = count
+            
     except Exception as e:
         logger.error(f"Error getting table stats: {e}")
     
