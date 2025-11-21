@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 CACHE_DIR = Path.home() / ".cache" / "maude-cli"
 CACHE_FILE = CACHE_DIR / "searchable_fields.json"
 CACHE_EXPIRY_DAYS = 7
+SIMILARITY_THRESHOLD = 0.6  # For fuzzy field name matching
 
 # Static fallback list of known searchable fields from OpenFDA documentation
 # https://open.fda.gov/apis/device/event/searchable-fields/
@@ -211,7 +212,7 @@ def _fetch_fields_from_api() -> list[str] | None:
                         paths.append(new_prefix)
                         if isinstance(value, (dict, list)):
                             paths.extend(get_field_paths(value, new_prefix))
-                elif isinstance(obj, list) and obj:
+                elif isinstance(obj, list) and len(obj) > 0:
                     # For lists, use the first item to discover nested fields
                     paths.extend(get_field_paths(obj[0], prefix))
                 return paths
@@ -272,7 +273,7 @@ def validate_field(field: str, *, suggest_on_error: bool = True) -> tuple[bool, 
         return False, None
     
     # Find similar fields
-    suggestions = get_close_matches(field, valid_fields, n=1, cutoff=0.6)
+    suggestions = get_close_matches(field, valid_fields, n=1, cutoff=SIMILARITY_THRESHOLD)
     suggestion = suggestions[0] if suggestions else None
     
     return False, suggestion

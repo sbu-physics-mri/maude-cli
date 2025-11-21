@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import json
 import sys
+import tempfile
 import time
 import unittest
 from pathlib import Path
@@ -21,12 +22,9 @@ class TestCLIFieldValidation(unittest.TestCase):
         """Set up test fixtures."""
         # Use a temporary cache for testing
         self.original_cache_file = field_validator.CACHE_FILE
-        self.test_cache = Path("/tmp/test_maude_cli_integration.json")
+        self.test_cache_dir = tempfile.mkdtemp()
+        self.test_cache = Path(self.test_cache_dir) / "test_maude_cli_integration.json"
         field_validator.CACHE_FILE = self.test_cache
-        
-        # Clean up any existing test cache
-        if self.test_cache.exists():
-            self.test_cache.unlink()
         
         # Pre-populate cache with known fields to avoid API calls
         cache = {
@@ -43,8 +41,9 @@ class TestCLIFieldValidation(unittest.TestCase):
         field_validator.CACHE_FILE = self.original_cache_file
         
         # Clean up test cache
-        if self.test_cache.exists():
-            self.test_cache.unlink()
+        import shutil
+        if Path(self.test_cache_dir).exists():
+            shutil.rmtree(self.test_cache_dir)
 
     def test_cli_with_invalid_field(self) -> None:
         """Test CLI exits with error for invalid field."""
@@ -102,12 +101,9 @@ class TestCacheRefreshOnValidation(unittest.TestCase):
         """Set up test fixtures."""
         # Use a temporary cache for testing
         self.original_cache_file = field_validator.CACHE_FILE
-        self.test_cache = Path("/tmp/test_maude_cache_refresh.json")
+        self.test_cache_dir = tempfile.mkdtemp()
+        self.test_cache = Path(self.test_cache_dir) / "test_maude_cache_refresh.json"
         field_validator.CACHE_FILE = self.test_cache
-        
-        # Clean up any existing test cache
-        if self.test_cache.exists():
-            self.test_cache.unlink()
 
     def tearDown(self) -> None:
         """Clean up test fixtures."""
@@ -115,8 +111,9 @@ class TestCacheRefreshOnValidation(unittest.TestCase):
         field_validator.CACHE_FILE = self.original_cache_file
         
         # Clean up test cache
-        if self.test_cache.exists():
-            self.test_cache.unlink()
+        import shutil
+        if Path(self.test_cache_dir).exists():
+            shutil.rmtree(self.test_cache_dir)
 
     def test_expired_cache_triggers_refresh(self) -> None:
         """Test that expired cache triggers a refresh attempt."""

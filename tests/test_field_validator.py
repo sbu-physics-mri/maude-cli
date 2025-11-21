@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import json
+import tempfile
 import time
 import unittest
 from pathlib import Path
@@ -20,12 +21,9 @@ class TestFieldValidation(unittest.TestCase):
         """Set up test fixtures."""
         # Use a temporary cache for testing
         self.original_cache_file = field_validator.CACHE_FILE
-        self.test_cache = Path("/tmp/test_maude_cache.json")
+        self.test_cache_dir = tempfile.mkdtemp()
+        self.test_cache = Path(self.test_cache_dir) / "test_maude_cache.json"
         field_validator.CACHE_FILE = self.test_cache
-        
-        # Clean up any existing test cache
-        if self.test_cache.exists():
-            self.test_cache.unlink()
 
     def tearDown(self) -> None:
         """Clean up test fixtures."""
@@ -33,8 +31,9 @@ class TestFieldValidation(unittest.TestCase):
         field_validator.CACHE_FILE = self.original_cache_file
         
         # Clean up test cache
-        if self.test_cache.exists():
-            self.test_cache.unlink()
+        import shutil
+        if Path(self.test_cache_dir).exists():
+            shutil.rmtree(self.test_cache_dir)
 
     def test_validate_field_valid(self) -> None:
         """Test validation of a valid field."""
@@ -99,12 +98,9 @@ class TestFieldCaching(unittest.TestCase):
         """Set up test fixtures."""
         # Use a temporary cache for testing
         self.original_cache_file = field_validator.CACHE_FILE
-        self.test_cache = Path("/tmp/test_maude_cache.json")
+        self.test_cache_dir = tempfile.mkdtemp()
+        self.test_cache = Path(self.test_cache_dir) / "test_maude_cache.json"
         field_validator.CACHE_FILE = self.test_cache
-        
-        # Clean up any existing test cache
-        if self.test_cache.exists():
-            self.test_cache.unlink()
 
     def tearDown(self) -> None:
         """Clean up test fixtures."""
@@ -112,8 +108,9 @@ class TestFieldCaching(unittest.TestCase):
         field_validator.CACHE_FILE = self.original_cache_file
         
         # Clean up test cache
-        if self.test_cache.exists():
-            self.test_cache.unlink()
+        import shutil
+        if Path(self.test_cache_dir).exists():
+            shutil.rmtree(self.test_cache_dir)
 
     def test_load_cache_nonexistent(self) -> None:
         """Test loading cache when file doesn't exist."""
@@ -261,12 +258,9 @@ class TestGetValidFields(unittest.TestCase):
         """Set up test fixtures."""
         # Use a temporary cache for testing
         self.original_cache_file = field_validator.CACHE_FILE
-        self.test_cache = Path("/tmp/test_maude_cache.json")
+        self.test_cache_dir = tempfile.mkdtemp()
+        self.test_cache = Path(self.test_cache_dir) / "test_maude_cache.json"
         field_validator.CACHE_FILE = self.test_cache
-        
-        # Clean up any existing test cache
-        if self.test_cache.exists():
-            self.test_cache.unlink()
 
     def tearDown(self) -> None:
         """Clean up test fixtures."""
@@ -274,8 +268,9 @@ class TestGetValidFields(unittest.TestCase):
         field_validator.CACHE_FILE = self.original_cache_file
         
         # Clean up test cache
-        if self.test_cache.exists():
-            self.test_cache.unlink()
+        import shutil
+        if Path(self.test_cache_dir).exists():
+            shutil.rmtree(self.test_cache_dir)
 
     @mock.patch.object(field_validator, "_fetch_fields_from_api")
     def test_get_valid_fields_from_api(
