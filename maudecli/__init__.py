@@ -12,6 +12,7 @@ from pathlib import Path
 # Local imports
 from maudecli.api import fetch_results
 from maudecli.db import query_local_database, database_exists
+from maudecli.field_validator import validate_fields
 from maudecli.formatters import as_csv, as_org
 
 logger = logging.getLogger(__name__)
@@ -87,6 +88,20 @@ def main() -> None:
     )
 
     args = parser.parse_args()
+
+    # Validate search fields before querying
+    all_valid, suggestions = validate_fields(args.search_fields)
+    if not all_valid:
+        for invalid_field, suggestion in suggestions.items():
+            if suggestion:
+                logger.error(
+                    "Invalid search field: '%s'. Did you mean '%s'?",
+                    invalid_field,
+                    suggestion,
+                )
+            else:
+                logger.error("Invalid search field: '%s'", invalid_field)
+        sys.exit(1)
 
     # Process term groups into lists
     terms = [group.split(",") for group in args.term_groups]

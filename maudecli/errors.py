@@ -45,3 +45,16 @@ class APIResponseError(Exception):
         super().__init__(f"API returned error {status_code}: {message}")
         self.status_code = status_code
         self.api_message = message
+
+
+class InvalidSearchFieldError(ValueError):
+    """Invalid search field provided."""
+
+    def __init__(self, field: str, suggestion: str | None = None) -> None:
+        """Initialise the error."""
+        message = f"Invalid search field: '{field}'"
+        if suggestion:
+            message += f". Did you mean '{suggestion}'?"
+        super().__init__(message)
+        self.field = field
+        self.suggestion = suggestion
