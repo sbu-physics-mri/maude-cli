@@ -46,9 +46,6 @@ jobs:
        repo_name=$(basename $GITHUB_REPOSITORY)
        sed -i "s/^name = .*/name = \"${repo_name}\"/" pyproject.toml
 
-    - name: Build the database for historical incidents
-      run: uv run python data/build.py
-
     - name: Build package
       run: uv build
 
