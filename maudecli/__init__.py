@@ -3,6 +3,7 @@
 # ruff: noqa: T201
 
 # Python imports
+import asyncio
 import argparse
 import json
 import logging
@@ -11,11 +12,10 @@ from pathlib import Path
 
 # Local imports
 from maudecli.api import fetch_results
-from maudecli.db import query_local_database, database_exists
+from maudecli.db import build_database, database_exists, query_local_database
 from maudecli.formatters import as_csv, as_org
 
 logger = logging.getLogger(__name__)
-
 
 
 def main() -> None:
@@ -62,9 +62,9 @@ def main() -> None:
     )
     parser.add_argument(
         "-o", "--format",
-        default="org",
+        default="json",
         choices=["org", "json", "csv", "text"],
-        help="Output format (default: org)",
+        help="Output format (default: json)",
     )
     parser.add_argument(
         "-O", "--output",
@@ -95,6 +95,9 @@ def main() -> None:
         if args.exclude
         else None
     )
+
+    # Builds the local database
+    asyncio.run(build_database())
 
     # Fetch results from API
     results = fetch_results(
