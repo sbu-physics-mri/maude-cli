@@ -1,5 +1,6 @@
 """Unit tests for local database functionality."""
 
+import gc
 import sqlite3
 import tempfile
 import unittest
@@ -73,6 +74,10 @@ class TestDatabaseQueries(unittest.TestCase):
     def tearDown(self):
         """Clean up test database."""
         db.DB_PATH = self.original_db_path
+
+        # Force garbage collection
+        gc.collect()
+
         self.temp_db_path.unlink(missing_ok=True)
 
     def test_database_exists(self):
