@@ -307,7 +307,7 @@ class TestDownloadFileFromUrl(unittest.TestCase):
             mock_urlretrieve.return_value = None
             
             url = "https://example.com/test.zip"
-            result = asyncio.run(db.download_file_from_url(url))
+            asyncio.run(db.download_file_from_url(url))
 
             # Verify urlretrieve was called
             mock_urlretrieve.assert_called_once()
