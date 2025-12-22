@@ -388,15 +388,33 @@ async def build_database() -> None:
     conn = sqlite3.connect(DB_PATH)
 
     # Download data files
-    data_files = [
-        f 
-        for f in await asyncio.gather(
-                *[download_file_from_url(url) for url in DATAFILE_URLS],
-                return_exceptions=True,
-        )
-        if isinstance(f, Path) and f.exists()
-    ]
+    results = await asyncio.gather(
+        *[download_file_from_url(url) for url in DATAFILE_URLS],
+        return_exceptions=True,
+    )
+
+    data_files = []
+    failed_downloads = 0
+
+    for url, result in zip(DATAFILE_URLS, results):
+        if isinstance(result, Path) and result.exists():
+            data_files.append(result)
+        elif isinstance(result, Exception):
+            logger.error("Failed to download %s: %s", url, result)
+            failed_downloads += 1
+        else:
+            logger.error(
+                "Unexpected result when downloading %s: %r", url, result,
+            )
+            failed_downloads += 1
+
     logger.info("Found %i/%i data files", len(data_files), len(DATAFILE_URLS))
+    if failed_downloads:
+        logger.warning(
+            "Failed to download %i/%i data files",
+            failed_downloads,
+            len(DATAFILE_URLS),
+        )
 
     try:
         # Create tables
