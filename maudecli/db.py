@@ -4,7 +4,7 @@ Includes build function to ingest MAUDE files into a local SQLite database.
 
 The function downloads MAUDE data files and
 classifies them by record type (device, foitext, foidev), and ingests them into
-a SQLite database at maudecli/resources/historical-incidents.sqlite3.
+a SQLite database in the user's home directory at ``~/.maudecli/historical-incidents.sqlite3``.
 
 The process is idempotent
 - re-running on the same files will not create duplicates.
@@ -80,7 +80,6 @@ def compute_row_hash(row: pd.Series) -> str:
     # Create a stable string representation of the row
     row_str = "|".join(str(v) if pd.notna(v) else "" for v in row)
     return hashlib.sha256(row_str.encode()).hexdigest()
-
 def classify_file(filename: str) -> RecordType | None:
     """Classify a file into its record type based on filename.
 
@@ -383,15 +382,33 @@ async def build_database() -> None:
     conn = sqlite3.connect(DB_PATH)
 
     # Download data files
-    data_files = [
-        f 
-        for f in await asyncio.gather(
-                *[download_file_from_url(url) for url in DATAFILE_URLS],
-                return_exceptions=True,
-        )
-        if isinstance(f, Path) and f.exists()
-    ]
+    results = await asyncio.gather(
+        *[download_file_from_url(url) for url in DATAFILE_URLS],
+        return_exceptions=True,
+    )
+
+    data_files = []
+    failed_downloads = 0
+
+    for url, result in zip(DATAFILE_URLS, results):
+        if isinstance(result, Path) and result.exists():
+            data_files.append(result)
+        elif isinstance(result, Exception):
+            logger.error("Failed to download %s: %s", url, result)
+            failed_downloads += 1
+        else:
+            logger.error(
+                "Unexpected result when downloading %s: %r", url, result,
+            )
+            failed_downloads += 1
+
     logger.info("Found %i/%i data files", len(data_files), len(DATAFILE_URLS))
+    if failed_downloads:
+        logger.warning(
+            "Failed to download %i/%i data files",
+            failed_downloads,
+            len(DATAFILE_URLS),
+        )
 
     try:
         # Create tables
