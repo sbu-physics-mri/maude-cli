@@ -1,0 +1,993 @@
+These data files are are obtained from:
+<https://www.fda.gov/medical-devices/medical-device-reporting-mdr-how-report-medical-device-problems/mdr-data-files>
+on 17/11/2025 and aim to fill the gap in the MAUDE database by the API.
+
+Lifted from the website and converted to ascii:
+
+This section provides downloadable zipped data files that consist of:
+
+
+1 Voluntary reports since June 1993
+===================================
+
+
+2 User facility reports since 1991
+==================================
+
+
+3 Distributor reports since 1993
+================================
+
+
+4 Manufacturer reports since August 1996
+========================================
+
+  This data is provided in zip files, which are updated monthly.
+
+  The MDR data is presented in tables and contains all publicly
+  available information from the completed the MEDWATCH Form 3500. The
+  FDA recommends downloading all types of files for the time period of
+  interest.
+
+  Tips for Reviewing the Downloaded Files
+
+
+5 Field Definitions:
+====================
+
+  * Master Event Data: A distinct master event data record will be
+    present for each
+  source reporting an event. In other words, if a User Facility,
+  Distributor, Manufacturer, and voluntary submitter all report an
+  event, there will be four event records.
+  * Device Data: Contains information related to the device(s) involved
+    in the event.
+  * Patient Data: Contains information related to the patient(s)
+    involved in the event.
+  * Text Data: Contains textual information from MEDWATCH Form Sections
+    B5, H3, and
+  H10.
+  * Device Problem Data: Contains Device Problem Code data from MEDWATCH
+    Form
+  Sections F10 and H6
+  * Patient Problem Data: Contains Health Effect - Clinical Code
+    (previously labeled
+  "Patient Code") data from MEDWATCH Form Sections F10 and H6
+
+
+6 All record types are linked by the MDR REPORT KEY, found in each file.
+========================================================================
+
+
+7 For distributor reports that also had subsequent manufacturer reports, a special data
+=======================================================================================
+
+  element, MANUFACTURER LINK FLAG, will be set to 'Y'. In this case, the
+  DISTRIBUTOR information (Section F on the master event data record)
+  will be present; otherwise, these data elements will be blank.
+
+  Note: This documentation is intended to be used in conjunction with a
+  copy of Medwatch Form 3500A and 3500.
+
+  Record/Data Characteristics:
+
+
+8 The data has one record per line, with the data fields in a pipe-delimited, (i.e., "|")
+=========================================================================================
+
+  format
+
+
+9 All data elements are alpha-numeric
+=====================================
+
+
+10 All text fields contain whatever data was provided/entered. If no information was
+====================================================================================
+
+  provided/entered the field will be left empty. If an asterisk ("*") is
+  present, it represents what was entered on the 3500/3500A.
+
+
+11 All "FLAG" data elements have the value of "Y" for Yes, "N" for No, or are blank if no
+=========================================================================================
+
+  data was available/entered.
+
+
+12 All fields identified as multiply-occurring represent data elements which may have
+=====================================================================================
+
+  multiple values. Each value will be present in the field, separated by
+  a comma. The word "OTHER" may appear as one of the values if the
+  "Other" box was checked off. If the whole field is blank, no data was
+  reported/entered.
+
+
+13 Section G CONTACT address information may not necessarily be the address where
+=================================================================================
+
+  the device is manufactured.
+
+  Special Note for REPORT NUMBER data element:
+
+  The REPORT NUMBER data element represents Manufacturer Report Number,
+  Distributor Report Number, or internally-generated voluntary report
+  number, depending on the source of the record.
+
+  This REPORT NUMBER field will be blank when:
+
+
+14 User Facility submitted the report
+=====================================
+
+
+15 Distributor report has not been followed by a subsequent Manufacturer report.
+================================================================================
+
+  Special Notes for Voluntary Reports and User Facility Malfunction
+  Reports:
+
+  The only data elements which will be present on the Master Event
+  Record will be:
+
+
+16 NEW RECORD
+=============
+
+
+17 DEVICE EVENT KEY
+===================
+
+
+18 REPORT SOURCE CODE
+=====================
+
+
+19 MDR REPORT KEY
+=================
+
+
+20 Section B
+============
+
+  All other data elements will be blank.
+
+  MDRFOI file contains following 82 fields, delimited by pipe (|), one
+  record per line:
+
+  1 MDR Report Key 2 Empty field (not used) 3 Report Number 4 Report
+  Source Code
+
+  * P = Voluntary report
+  * U = User Facility report
+  * D = Distributor report
+  * M = Manufacturer report
+
+  5 Manufacturer Link Flag (internal information flag) 6 Number Devices
+  in Event (if source code is 'P', field will be null) 7 Number Patient
+  in Event (if source code is 'P', field will be null) 8 Date Received
+
+  SECTION-B
+
+  9 Adverse Event Flag (B1) 10 Product Problem Flag (B1) 11 Date Report
+  (B4) 12 Date of Event (B3) -- new added, 2006 13 Single Use Flag
+  (Reprocessor Flag) (D8) -- new added, 2006 14 Reporter Occupation Code
+  (E3) -- new added, 2006
+
+
+21 INVALID DATA
+===============
+
+
+22 000 OTHER
+============
+
+
+23 001 PHYSICIAN
+================
+
+
+24 002 NURSE
+============
+
+
+25 003 NON-HEALTHCARE PROFESSIONAL
+==================================
+
+
+26 0HP HEALTH PROFESSIONAL
+==========================
+
+
+27 0LP LAY USER/PATIENT
+=======================
+
+
+28 100 OTHER HEALTH CARE PROFESSIONAL
+=====================================
+
+
+29 101 AUDIOLOGIST
+==================
+
+
+30 102 DENTAL HYGIENIST
+=======================
+
+
+31 103 DIETICIAN
+================
+
+
+32 104 EMERGENCY MEDICAL TECHNICIAN
+===================================
+
+
+33 105 MEDICAL TECHNOLOGIST
+===========================
+
+
+34 106 NUCLEAR MEDICINE TECHNOLOGIST
+====================================
+
+
+35 107 OCCUPATIONAL THERAPIST
+=============================
+
+
+36 108 PARAMEDIC
+================
+
+
+37 109 PHARMACIST
+=================
+
+
+38 110 PHLEBOTOMIST
+===================
+
+
+39 111 PHYSICAL THERAPIST
+=========================
+
+
+40 112 PHYSICIAN ASSISTANT
+==========================
+
+
+41 113 RADIOLOGIC TECHNOLOGIST
+==============================
+
+
+42 114 RESPIRATORY THERAPIST
+============================
+
+
+43 115 SPEECH THERAPIST
+=======================
+
+
+44 116 DENTIST
+==============
+
+
+45 117 NURSE PRACTITIONER
+=========================
+
+
+46 300 OTHER CAREGIVERS
+=======================
+
+
+47 301 DENTAL ASSISTANT
+=======================
+
+
+48 302 HOME HEALTH AIDE
+=======================
+
+
+49 303 MEDICAL ASSISTANT
+========================
+
+
+50 304 NURSING ASSISTANT
+========================
+
+
+51 305 PATIENT
+==============
+
+
+52 306 PATIENT FAMILY MEMBER OR FRIEND
+======================================
+
+
+53 307 PERSONAL CARE ASSISTANT
+==============================
+
+
+54 400 SERVICE AND TESTING PERSONNEL
+====================================
+
+
+55 401 BIOMEDICAL ENGINEER
+==========================
+
+
+56 402 HOSPITAL SERVICE TECHNICIAN
+==================================
+
+
+57 403 MEDICAL EQUIPMENT COMPANY TECHNICIAN/REPRESENTATIVE
+==========================================================
+
+
+58 404 PHYSICIST
+================
+
+
+59 405 SERVICE PERSONNEL
+========================
+
+
+60 499 DEVICE UNATTENDED
+========================
+
+
+61 500 RISK MANAGER
+===================
+
+
+62 501 ADMINISTRATOR/SUPERVISOR
+===============================
+
+
+63 600 ATTORNEY
+===============
+
+
+64 999 UNKNOWN
+==============
+
+
+65 NA NOT APPLICABLE
+====================
+
+
+66 NI NO INFORMATION
+====================
+
+
+67 UNK UNKNOWN
+==============
+
+  SECTION-E (if source code is 'P', Section E to H will contain no data)
+
+  15 Health Professional (E2) 16 Initial Report to FDA (E4)
+
+  * Y = Yes
+  * N = No
+  * U = Unknown
+  * * = No answer provided
+
+  SECTION-F
+
+  17 Date Facility Aware (F6) 18 Report Date (F8) 19 Report to FDA (F11)
+  20 Date Report to FDA (F11) 21 Event Location (F12) 22 Date Report to
+  Manufacturer (F13)
+
+  SECTION-G (only for report source 'M', others sources will be null)
+
+  23 Manufacturer Contact Title Name (G1) 24 Manufacturer Contact First
+  Name (G1) 25 Manufacturer Contact Last Name (G1) 26 Manufacturer
+  Contact Street 1 (G1) 27 Manufacturer Contact Street 2 (G1) 28
+  Manufacturer Contact City (G1) 29 Manufacturer Contact State Code (G1)
+  30 Manufacturer Contact Zip Code (G1) 31 Manufacturer Contact Zip Code
+  Ext (G1) 32 Manufacturer Contact Country Code 33 Manufacturer Contact
+  Postal Code 34 Manufacturer Contact Phone No Area Code (G1) 35
+  Manufacturer Contact Phone No Exchange (G2) 36 Manufacturer Contact
+  Phone No (G2) 37 Manufacturer Contact Phone No Ext (G2) 38
+  Manufacturer Contact Phone No Country Code 39 Manufacturer Contact
+  Phone No City Code 40 Manufacturer Contact Phone No Local 41
+  Manufacturer G1 Name (G1) 42 Manufacturer G1 Street 1 (G1) 43
+  Manufacturer G1 Street 2 (G1) 44 Manufacturer G1 City (G1) 45
+  Manufacturer G1 State Code (G1) 46 Manufacturer G1 Zip Code (G1) 47
+  Manufacturer G1 Zip Code Ext (G1) 48 Manufacturer G1 Country Code 49
+  Manufacturer G1 Postal Code 50 Date Manufacturer Received (G4)
+
+  SECTION-H
+
+  51 Device Date Of Manufacture (H4) 52 Single Use Flag (H5) 53 Remedial
+  Action (H7) -- multiple source type, separate by ','
+
+  * RC = Recall
+  * RP = Repair
+  * RL = Replace
+  * RB = Relabeling
+  * OT = Other
+  * NO = Notification
+  * IN = Inspection
+  * PM = Patient Monitoring
+  * MA = Modification/Adjustment
+  * * = Invalid Data
+
+  54 Previous Use Code (H8) 55 Removal/Correction Number (H9) 56 Event
+  type (H1) -- only relevant for report sourcetype 'M'
+
+  * D = Death
+  * IN = Injury
+  * M = Malfunction
+  * O = Other
+  * * = No answer provided
+
+  57 Distributor Name (F3) -- if report source code = 'M' and 58
+  Distributor Address line 1 (F3) 59 Distributor Address line 2 (F3) 60
+  Distributor City (F3) 61 Distributor State Code (F3) 62 Distributor
+  Zip Code (F3) 63 Distributor Zip Code Ext (F3) 64 Report to
+  Manufacturer (F13) 65 Manufacturer Name (F14) 66 Manufacturer Address
+  line 1 (F14) 67 Manufacturer Address line 2 (F14) 68 Manufacturer City
+  (F14) 69 Manufacturer State Code (F14) 70 Manufacturer Zip Code (F14)
+  71 Manufacturer Zip Code Ext (F14) 72 Manufacturer Country Code (F14)
+  73 Manufacturer Postal Code (F14) 74 Type of Report (F7) !multiple
+  submission type, separate by ','
+
+  * I = Initial submission
+  * F = Followup
+  * X = Extra copy received
+  * O = Other information submitted
+
+  75 Source Type (G3) -- multiple source type, separate by ','
+
+  * 00 Other
+  * 01 Foreign
+  * 02 Study
+  * 03 Literature
+  * 04 Consumer
+  * 05 Health Professional
+  * 06 User facility
+  * 07 Company representation
+  * 08 Distributor
+  * 99 Unknown
+  * * Invalid data
+
+  76 Date Added 77 Date Changed 78 Reporter Country Code 79 PMA PMN
+  Number 80 Exemption Number 81 Summary Report 82 NOE Summary 83 Suppl
+  Dates FDA Received 84 Suppl Dates MFR Received
+
+  DEVICE file contains following 48 fields, delimited by pipe (|), one
+  record per line:
+
+  1 MDR Report Key 2 Device Event key 3 Implant Flag -- D6, new added;
+  2006 4 Date Removed Flag -- D7, new added; 2006; if flag in M or Y,
+  print Date
+
+  * U = Unknown
+  * A = Not available
+  * I = No information at this time
+  * M = Month and year provided only, day defaults to 01
+  * Y = Year provided only, day defaulted to 01, month defaulted to
+    January
+
+  5 Device Sequence No -- from device report table 6 Date Received (from
+  mdr_document table)
+
+  SECTION-D
+
+  7 Brand Name (D1) 8 Generic Name (D2) 9 Manufacturer Name (D3) 10
+  Manufacturer Address 1 (D3) 11 Manufacturer Address 2 (D3) 12
+  Manufacturer City (D3) 13 Manufacturer State Code (D3) 14 Manufacturer
+  Zip Code (D3) 15 Manufacturer Zip Code ext (D3) 16 Manufacturer
+  Country Code (D3) 17 Manufacturer Postal Code (D3) 18 Device Operator
+  (D5) 19 Expiration Date of Device (D4) 20 Model Number (D4) 21 Catalog
+  Number (D4) 22 Lot Number (D4) 23 Other ID Number (D4) 24 Device
+  Availability (D10)
+
+  * Y = Yes
+  * N = No
+  * R = Device was returned to manufacturer
+  * * = No answer provided
+
+  25 Date Returned to Manufacturer (D10) 26 Device Report Product Code
+  27 Device Age (F9) 28 Device Evaluated by Manufacturer (H3)
+
+  * Y = Yes
+  * N = No
+  * R = Device not returned to manufacturer
+  * * = No answer provided
+
+  29 Combination Product Flag (G4)
+
+  * Y = Yes
+  * N = No
+
+  30 UDI-DI 31 UDI-Public
+
+  BASELINE SECTION (for records prior to 2009)
+
+  32 Baseline brand name 33 Baseline generic name 34 Baseline model no
+  35 Baseline catalog no 36 Baseline other id no 37 Baseline device
+  family 38 Baseline shelf life contained in label
+
+  * Y = Yes
+  * N = No
+  * A = Not applicable
+  * * = No answer provided
+
+  39 Baseline shelf life in months 40 Baseline PMA flag 41 Baseline PMA
+  no 42 Baseline 510(k) flag 43 Baseline 510(k) no 44 Baseline
+  preamendment 45 Baseline transitional 46 Baseline 510(k exempt flag 47
+  Baseline date) first marketed 48 Baseline date ceased marketing
+
+  PATIENT file contains following 10 fields, delimited by pipe (|), one
+  record per line:
+
+  1 MDR Report Key (from patient report table) 2 Patient Sequence Number
+  (from patient report table) 3 Date Received (from mdr_document table)
+  4 Sequence Number||','|| Treatment -- multiple source type, separate
+  by ';' 5 Sequence Number||','|| Outcome -- multiple source type,
+  separate by ';'
+
+  * L - Life Threatening
+  * H - Hospitalization
+  * S - Disability
+  * C - Congenital Anomaly
+  * R - Required Intervention
+  * O - Other
+  * * - Invalid Data
+  * U - Unknown
+  * I - No Information
+  * A - Not Applicable
+  * D - Death
+
+  6 Patient Age 7 Patient Sex 8 Patient Weight 9 Patient Ethnicity 10
+  Patient Race
+
+  TEXT file contains following 6 fields, delimited by pipe (|), one
+  record per line:
+
+  1 MDR Report Key 2 MDR Text Key 3 Text Type Code (D=B5, E=H3, N=H10
+  from mdr_text table) 4 Patient Sequence Number (from mdr_text table) 5
+  Date Report (from mdr_text table) 6 Text (B5, or H3 or H10 from
+  mdr_text table)
+
+  FOIDEVPROBLEM contains 2 fields, delimited by pipe (|), one record per
+  line:
+
+  1 Device Problem Code 2 Problem Description
+
+  DEVICEPROBLEMCODES contains 2 fields, delimited by pipe (|), one
+  record per line:
+
+  1 MDR Report Key 2 Device Problem Code -- (F10) new added; 2006
+
+  PATIENTPROBLEMDATA contains following 2 fields, delimited by pipe (|),
+  one record per line:
+
+  1 Patient Problem Code 2 Problem Description
+
+  PATIENTPROBLEMCODE contains following 2 fields, delimited by pipe (|),
+  one record per line:
+
+  1 MDR Report Key 2 Patient Problem Code
+
+  Device Operator Code Key
+
+
+68 * INVALID DATA
+=================
+
+
+69 0 OTHER
+==========
+
+
+70 1 PHYSICIAN
+==============
+
+
+71 2 NURSE
+==========
+
+
+72 3 NON-HEALTHCARE PROFESSIONAL
+================================
+
+
+73 0HP HEALTH PROFESSIONAL
+==========================
+
+
+74 0LP LAY USER/PATIENT
+=======================
+
+
+75 100 OTHER HEALTH CARE PROFESSIONAL
+=====================================
+
+
+76 101 AUDIOLOGIST
+==================
+
+
+77 102 DENTAL HYGIENIST
+=======================
+
+
+78 103 DIETICIAN
+================
+
+
+79 104 EMERGENCY MEDICAL TECHNICIAN
+===================================
+
+
+80 105 MEDICAL TECHNOLOGIST
+===========================
+
+
+81 106 NUCLEAR MEDICINE TECHNOLOGIST
+====================================
+
+
+82 107 OCCUPATIONAL THERAPIST
+=============================
+
+
+83 108 PARAMEDIC
+================
+
+
+84 109 PHARMACIST
+=================
+
+
+85 110 PHLEBOTOMIST
+===================
+
+
+86 111 PHYSICAL THERAPIST
+=========================
+
+
+87 112 PHYSICIAN ASSISTANT
+==========================
+
+
+88 113 RADIOLOGIC TECHNOLOGIST
+==============================
+
+
+89 114 RESPIRATORY THERAPIST
+============================
+
+
+90 115 SPEECH THERAPIST
+=======================
+
+
+91 116 DENTIST
+==============
+
+
+92 117 NURSE PRACTIONER
+=======================
+
+
+93 300 OTHER CAREGIVERS
+=======================
+
+
+94 301 DENTAL ASSISTANT
+=======================
+
+
+95 302 HOME HEALTH AIDE
+=======================
+
+
+96 303 MEDICAL ASSISTANT
+========================
+
+
+97 304 NURSING ASSISTANT
+========================
+
+
+98 305 PATIENT
+==============
+
+
+99 306 PATIENT FAMILY MEMBER OR FRIEND
+======================================
+
+
+100 307 PERSONAL CARE ASSISTANT
+===============================
+
+
+101 400 SERVICE AND TESTING PERSONNEL
+=====================================
+
+
+102 401 BIOMEDICAL ENGINEER
+===========================
+
+
+103 402 HOSPITAL SERVICE TECHNICIAN
+===================================
+
+
+104 403 MEDICAL EQUIPMENT COMPANY TECHNICIAN/REPRESENTATIVE
+===========================================================
+
+
+105 404 PHYSICIST
+=================
+
+
+106 405 SERVICE PERSONNEL
+=========================
+
+
+107 499 DEVICE UNATTENDED
+=========================
+
+
+108 500 RISK MANAGER
+====================
+
+
+109 501 ADMINISTRATOR/SUPERVISOR
+================================
+
+
+110 600 ATTORNEY
+================
+
+
+111 999 UNKNOWN
+===============
+
+
+112 NA NOT APPLICABLE
+=====================
+
+
+113 NI NO INFORMATION
+=====================
+
+
+114 UNK UNKNOWN
+===============
+
+  Event Location Code Key
+
+
+115 * INVALID DATA
+==================
+
+
+116 000 OTHER
+=============
+
+
+117 001 HOSPITAL
+================
+
+
+118 002 HOME
+============
+
+
+119 003 NURSING HOME
+====================
+
+
+120 004 OUTPATIENT TREATMENT FACILITY
+=====================================
+
+
+121 005 OUTPATIENT DIAGNOSTIC FACILITY
+======================================
+
+
+122 006 AMBULATORY SURGICAL FACILITY
+====================================
+
+
+123 500 HOSPITAL
+================
+
+
+124 501 CATHETERIZATION SUITE
+=============================
+
+
+125 502 CRITICAL CARE UNIT
+==========================
+
+
+126 503 DIALYSIS UNIT
+=====================
+
+
+127 504 EMERGENCY ROOM
+======================
+
+
+128 505 EXAMINATION ROOM
+========================
+
+
+129 506 LABORATORY/PATHOLOGY DEPARTMENT
+=======================================
+
+
+130 507 MATERNITY WARD - NURSERY
+================================
+
+
+131 508 OPERATING ROOM
+======================
+
+
+132 509 OUTPATIENT CLINIC/SURGERY
+=================================
+
+
+133 510 PATIENT'S ROOM OR WARD
+==============================
+
+
+134 511 RADIOLOGY DEPARTMENT
+============================
+
+
+135 600 AMBULATORY HEALTH CARE FACILITY
+=======================================
+
+
+136 601 AMBULATORY SURGICAL CENTER
+==================================
+
+
+137 602 BLOOD BANK
+==================
+
+
+138 603 BLOODMOBILE
+===================
+
+
+139 604 CATHETERIZATION LAB - FREE STANDING
+===========================================
+
+
+140 605 CHEMOTHERAPY CENTER
+===========================
+
+
+141 606 CLINIC - WALK IN, OTHER
+===============================
+
+
+142 607 DIALYSIS CENTER
+=======================
+
+
+143 608 DRUG CLINIC
+===================
+
+
+144 609 IMAGING CENTER - MOBILE
+===============================
+
+
+145 610 IMAGING CENTER - STATIONARY
+===================================
+
+
+146 611 LABORATORY
+==================
+
+
+147 612 MOBILE HEALTH UNIT
+==========================
+
+
+148 613 MRI CENTERS
+===================
+
+
+149 614 PSYCHIATRIC CENTER - WALK IN, OTHER
+===========================================
+
+
+150 615 TUBERCULOSIS CLINIC
+===========================
+
+
+151 616 URGENT CARE CENTER
+==========================
+
+
+152 617 OUTPATIENT DIAGNOSTIC FACILITY
+======================================
+
+
+153 700 LONG-TERM CARE FACILITY
+===============================
+
+
+154 701 HOSPICE
+===============
+
+
+155 702 NURSING HOME
+====================
+
+
+156 703 PSYCHIATRIC FACILITY
+============================
+
+
+157 704 REHABILITATION CENTER
+=============================
+
+
+158 705 RETIREMENT HOME
+=======================
+
+
+159 810 PATIENT'S HOME
+======================
+
+
+160 820 IN TRANSIT TO USER/MEDICAL FACILITY
+===========================================
+
+
+161 830 PUBLIC VENUE
+====================
+
+
+162 831 OUTDOORS
+================
+
+
+163 832 PARK
+============
+
+
+164 833 PLAYGROUND
+==================
+
+
+165 834 PUBLIC BUILDING
+=======================
+
+
+166 835 SCHOOL
+==============
+
+
+167 836 STREET
+==============
+
+
+168 999 UNKNOWN
+===============
+
+
+169 NA NOT APPLICABLE
+=====================
+
+
+170 NI NO INFORMATION
+=====================
+
+
+171 UNK UNKNOWN
+===============
