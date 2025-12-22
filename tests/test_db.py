@@ -496,16 +496,16 @@ class TestBuildDatabase(unittest.TestCase):
             asyncio.run(db.build_database())
             
             # Verify data was ingested
-            conn = sqlite3.connect(db.DB_PATH)
-            cursor = conn.cursor()
+            with sqlite3.connect(db.DB_PATH) as conn:
+                cursor = conn.cursor()
+                
+                cursor.execute("SELECT COUNT(*) FROM device")
+                count = cursor.fetchone()[0]
+                
+                # Should have ingested at least one row
+                self.assertGreater(count, 0)
             
-            cursor.execute("SELECT COUNT(*) FROM device")
-            count = cursor.fetchone()[0]
             
-            # Should have ingested at least one row
-            self.assertGreater(count, 0)
-            
-            conn.close()
 
     def test_build_database_idempotency(self):
         """Test that build_database is idempotent (no duplicates on re-run)."""
