@@ -392,14 +392,10 @@ class TestBuildDatabase(unittest.TestCase):
         # Set minimal URLs for testing
         db.DATAFILE_URLS = ()
         
-        # Mock download to return no files
-        with patch('maudecli.db.download_file_from_url') as mock_download:
-            mock_download.return_value = AsyncMock()
-            
-            asyncio.run(db.build_database())
-            
-            # Verify database file was created
-            self.assertTrue(db.DB_PATH.exists())
+        asyncio.run(db.build_database())
+        
+        # Verify database file was created
+        self.assertTrue(db.DB_PATH.exists())
 
     def test_build_database_creates_parent_directory(self):
         """Test that build_database creates parent directories."""
@@ -412,40 +408,34 @@ class TestBuildDatabase(unittest.TestCase):
         # Set minimal URLs for testing
         db.DATAFILE_URLS = ()
         
-        with patch('maudecli.db.download_file_from_url') as mock_download:
-            mock_download.return_value = AsyncMock()
-            
-            asyncio.run(db.build_database())
-            
-            # Verify parent directory was created
-            self.assertTrue(nested_path.parent.exists())
+        asyncio.run(db.build_database())
+        
+        # Verify parent directory was created
+        self.assertTrue(nested_path.parent.exists())
 
     def test_build_database_creates_tables(self):
         """Test that build_database creates required tables."""
         db.DATAFILE_URLS = ()
         
-        with patch('maudecli.db.download_file_from_url') as mock_download:
-            mock_download.return_value = AsyncMock()
-            
-            asyncio.run(db.build_database())
-            
-            # Verify tables exist
-            conn = sqlite3.connect(db.DB_PATH)
-            cursor = conn.cursor()
-            
-            cursor.execute("""
-                SELECT name FROM sqlite_master 
-                WHERE type='table' 
-                ORDER BY name
-            """)
-            tables = [row[0] for row in cursor.fetchall()]
-            
-            self.assertIn('device', tables)
-            self.assertIn('foitext', tables)
-            self.assertIn('foidev', tables)
-            self.assertIn('ingestion_log', tables)
-            
-            conn.close()
+        asyncio.run(db.build_database())
+        
+        # Verify tables exist
+        conn = sqlite3.connect(db.DB_PATH)
+        cursor = conn.cursor()
+        
+        cursor.execute("""
+            SELECT name FROM sqlite_master 
+            WHERE type='table' 
+            ORDER BY name
+        """)
+        tables = [row[0] for row in cursor.fetchall()]
+        
+        self.assertIn('device', tables)
+        self.assertIn('foitext', tables)
+        self.assertIn('foidev', tables)
+        self.assertIn('ingestion_log', tables)
+        
+        conn.close()
 
     def test_build_database_downloads_files(self):
         """Test that build_database downloads files from URLs."""
@@ -541,9 +531,6 @@ class TestBuildDatabase(unittest.TestCase):
             count_first = cursor.fetchone()[0]
             conn.close()
             
-            # Reset mock for second run
-            mock_download.side_effect = mock_download_func
-            
             # Run build again
             asyncio.run(db.build_database())
             
@@ -609,18 +596,15 @@ class TestBuildDatabase(unittest.TestCase):
         """Test that build_database properly closes database connection."""
         db.DATAFILE_URLS = ()
         
-        with patch('maudecli.db.download_file_from_url') as mock_download:
-            mock_download.return_value = AsyncMock()
-            
-            asyncio.run(db.build_database())
-            
-            # Should be able to connect to database without conflicts
-            conn = sqlite3.connect(db.DB_PATH)
-            cursor = conn.cursor()
-            cursor.execute("SELECT COUNT(*) FROM device")
-            conn.close()
-            
-            # If connection wasn't closed properly, this would fail
+        asyncio.run(db.build_database())
+        
+        # Should be able to connect to database without conflicts
+        conn = sqlite3.connect(db.DB_PATH)
+        cursor = conn.cursor()
+        cursor.execute("SELECT COUNT(*) FROM device")
+        conn.close()
+        
+        # If connection wasn't closed properly, this would fail
 
 
 if __name__ == '__main__':
