@@ -2,15 +2,13 @@
 
 import asyncio
 import gc
-import http.server
 import shutil
 import sqlite3
 import tempfile
-import threading
 import unittest
 import zipfile
 from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import patch
 
 from maudecli import db
 from maudecli.db import classify_file, compute_file_hash, compute_row_hash
