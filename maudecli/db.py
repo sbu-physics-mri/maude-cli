@@ -146,11 +146,6 @@ def create_tables(conn: sqlite3.Connection) -> None:
         )
     """)
 
-    # Create indexes
-    cursor.execute(
-        f"CREATE INDEX IF NOT EXISTS idx_{table}_{field} ON {table}({field})",
-    )
-
     conn.commit()
     logger.info("Database tables initialized")
 
