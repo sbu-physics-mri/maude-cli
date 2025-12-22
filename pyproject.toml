@@ -1,6 +1,6 @@
 [project]
 name = "maude-cli"
-version = "0.2.0"
+version = "0.3.0"
 description = "Command-line interface to search MAUDE database for medical device adverse events via openFDA API"
 readme = "README.md"
 requires-python = ">=3.12"
