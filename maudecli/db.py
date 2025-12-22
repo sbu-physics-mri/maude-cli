@@ -4,7 +4,7 @@ Includes build function to ingest MAUDE files into a local SQLite database.
 
 The function downloads MAUDE data files and
 classifies them by record type (device, foitext, foidev), and ingests them into
-a SQLite database at maudecli/resources/historical-incidents.sqlite3.
+a SQLite database in the user's home directory at ``~/.maudecli/historical-incidents.sqlite3``.
 
 The process is idempotent
 - re-running on the same files will not create duplicates.
