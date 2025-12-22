@@ -64,7 +64,9 @@ DATAFILE_URLS = (
     "https://www.accessdata.fda.gov/MAUDE/ftparea/foitext2008.zip",
 )
 
+ALLOWED_RECORD_TYPES = ("device", "foitext", "foidev")
 RecordType = Literal["device", "foitext", "foidev"]
+
 
 
 def compute_row_hash(row: pd.Series) -> str:
@@ -197,9 +199,8 @@ def add_columns_if_needed(
 
     """
     # Validate table_name to prevent SQL injection
-    allowed_tables = ("device", "foitext", "foidev")
-    if table_name not in allowed_tables:
-        msg = f"Invalid table_name: {table_name}. Must be one of {allowed_tables}"
+    if table_name not in ALLOWED_RECORD_TYPES:
+        msg = f"Invalid table_name: {table_name}. Must be one of {ALLOWED_RECORD_TYPES}"
         raise ValueError(msg)
 
     cursor = conn.cursor()
@@ -257,9 +258,8 @@ def ingest_file(
 
     """
     # Validate record_type to prevent SQL injection
-    allowed_types = ("device", "foitext", "foidev")
-    if record_type not in allowed_types:
-        msg = f"Invalid record_type: {record_type}. Must be one of {allowed_types}"
+    if record_type not in ALLOWED_RECORD_TYPES:
+        msg = f"Invalid record_type: {record_type}. Must be one of {ALLOWED_RECORD_TYPES}"
         raise ValueError(msg)
 
     logger.info(
