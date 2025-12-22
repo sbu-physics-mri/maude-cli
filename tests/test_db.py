@@ -6,6 +6,7 @@ import unittest
 from pathlib import Path
 
 from maudecli import db
+from maudecli.db import classify_file, compute_file_hash, compute_row_hash
 
 
 class TestDatabaseQueries(unittest.TestCase):
@@ -73,7 +74,7 @@ class TestDatabaseQueries(unittest.TestCase):
         """Clean up test database."""
         db.DB_PATH = self.original_db_path
         self.temp_db_path.unlink(missing_ok=True)
-    
+
     def test_database_exists(self):
         """Test database existence check."""
         self.assertTrue(db.database_exists())
@@ -189,8 +190,6 @@ class TestBuildScriptFunctions(unittest.TestCase):
     
     def test_classify_file(self):
         """Test file classification."""
-        from data.build import classify_file
-        
         self.assertEqual(classify_file('device2000.zip'), 'device')
         self.assertEqual(classify_file('DEVICE2000.ZIP'), 'device')
         self.assertEqual(classify_file('foitext1996.zip'), 'foitext')
@@ -200,8 +199,6 @@ class TestBuildScriptFunctions(unittest.TestCase):
     
     def test_compute_file_hash(self):
         """Test file hash computation."""
-        from data.build import compute_file_hash
-        
         # Create a temporary file
         with tempfile.NamedTemporaryFile(mode='w', delete=False) as f:
             f.write("test content\n")
@@ -220,8 +217,7 @@ class TestBuildScriptFunctions(unittest.TestCase):
     def test_compute_row_hash(self):
         """Test row hash computation."""
         import pandas as pd
-        from data.build import compute_row_hash
-        
+
         # Create test series
         row1 = pd.Series({'a': 'value1', 'b': 'value2', 'c': None})
         row2 = pd.Series({'a': 'value1', 'b': 'value2', 'c': None})
