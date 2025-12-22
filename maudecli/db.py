@@ -80,7 +80,6 @@ def compute_row_hash(row: pd.Series) -> str:
     # Create a stable string representation of the row
     row_str = "|".join(str(v) if pd.notna(v) else "" for v in row)
     return hashlib.sha256(row_str.encode()).hexdigest()
-
 def classify_file(filename: str) -> RecordType | None:
     """Classify a file into its record type based on filename.
 
