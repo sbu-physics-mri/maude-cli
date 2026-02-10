@@ -2,28 +2,36 @@
 
 ## Building the Database
 
-The local SQLite database is built from historical MAUDE CSV/ZIP files stored in the `data/` directory.
+The local SQLite database is built from historical MAUDE CSV/ZIP files downloaded directly from the FDA's MAUDE FTP area.
 
-```bash
+The database is automatically built when you run the CLI for the first time. The build process downloads historical data files and ingests them into a local SQLite database.
+
+Alternatively, you can build the database programmatically:
+
+```python
+import asyncio
+from maudecli.db import build_database
+
 # Build or update the database
-uv run python data/build.py
+asyncio.run(build_database())
 ```
 
-The script is idempotent - running it multiple times will not create duplicate rows. It will only process files that have changed or new files.
+The build process is idempotent - running it multiple times will not create duplicate rows. It will only process files that have changed or new files.
 
 ### Build Process
 
-The build script:
-1. Scans `data/` directory for `.zip`, `.csv`, and `.txt` files
-2. Classifies files by type: `device`, `foitext`, or `foidev`
-3. Extracts and normalizes column names
-4. Computes content hashes for deduplication
-5. Inserts new rows into the appropriate table
-6. Logs ingestion in the `ingestion_log` table
+The build function:
+1. Downloads MAUDE data files from FDA's FTP area (URLs defined in `db.py`)
+2. Caches downloaded files in `~/.cache/.maudecli/`
+3. Classifies files by type: `device`, `foitext`, or `foidev`
+4. Extracts and normalizes column names
+5. Computes content hashes for deduplication
+6. Inserts new rows into the appropriate table
+7. Logs ingestion in the `ingestion_log` table
 
 ### Database Location
 
-The database is created at: `maudecli/resources/historical-incidents.sqlite3`
+The database is created at: `~/.maudecli/historical-incidents.sqlite3`
 
 ## Querying the Database
 
