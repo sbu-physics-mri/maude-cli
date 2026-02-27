@@ -26,10 +26,16 @@ Search medical device adverse event reports directly from your terminal.
 
 ## Installation
 
-With uv:
+With uvx there's no need to install the tool before first use, just use:
 
 ```sh
-uvx maude-cli
+uvx maude-cli --help
+```
+
+or to use uv as more traditional package manage, i.e. download the `maude-cli` locally before first use:
+
+```sh
+uv tool install maude-cli
 ```
 
 or pip:
