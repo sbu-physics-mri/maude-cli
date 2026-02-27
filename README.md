@@ -90,6 +90,8 @@ The CLI supports sophisticated exclusion filtering using the `-x=/``--exclude` o
 
 ## Examples
 
+*Note with all of these examples if you are using `uvx` (recommended) then you must prepend `uvx` before each command. That is `maude-cli --help` would become `uvx maude-cli --help`*
+
 Search with specific fields and output format:
 
 ```
