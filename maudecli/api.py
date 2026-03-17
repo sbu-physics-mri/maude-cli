@@ -9,20 +9,55 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
 # Python imports
+import configparser
 import json
 import logging
 import urllib.request
+from pathlib import Path
 from typing import Generator, Iterable
+from urllib.parse import urlencode
 
 # Local imports
 from maudecli.errors import (
     APIConnectionError,
     APIRateLimitError,
+    APIRequestDailyLimitError,
     APIResponseError,
     CantConvertToStringError,
 )
 
 logger = logging.getLogger(__name__)
+
+_CONFIG_PATH = Path.home() / ".maudecli" / "config.ini"
+
+def get_api_key() -> str | None:
+    """Get the API key - if set."""
+    config = configparser.ConfigParser()
+
+    if not _CONFIG_PATH.exists():
+        return None
+
+    config.read(_CONFIG_PATH)
+
+    if "API" in config:
+        return config["API"].get("key", None)
+    return None
+
+
+def set_api_key(key: str) -> None:
+    """Set the API key."""
+    config = configparser.ConfigParser()
+    config.read(_CONFIG_PATH)
+
+    config["API"] = {"key": key}
+
+    # Ensure the configuration directory is only accessible by the user.
+    _CONFIG_PATH.parent.mkdir(mode=0o700, exist_ok=True)
+    with _CONFIG_PATH.open("w") as configfile:
+        config.write(configfile)
+    # Ensure the configuration file is only readable/writable by the user.
+    _CONFIG_PATH.chmod(0o600)
+    logger.info("API Key saved to %s", _CONFIG_PATH.as_posix())
 
 
 def construct_url(
@@ -101,6 +136,14 @@ def fetch_results(
         natively, so this implementation filters results after retrieval.
 
     """
+    # Load the API key
+    api_key = get_api_key()
+    base_endpoint = (
+        f"{base_endpoint}?{urlencode({'api_key': api_key})}&"
+        if api_key
+        else f"{base_endpoint}?"
+    )
+
     keywords = _validate_search_terms(terms)
     search_fields = (
         [search_fields]
@@ -111,7 +154,7 @@ def fetch_results(
     results = []
     pages = 0
     for sf in search_fields:
-        base_url = f"{base_endpoint}?search={sf}"
+        base_url = f"{base_endpoint}search={sf}"
         query = "+AND+".join(
             f"({'+OR+'.join(kw)})" for kw in keywords
         )
@@ -120,10 +163,17 @@ def fetch_results(
         )
 
         while url:
-            logger.debug("Sending request to %s", url)
+            logger.debug(
+                "Sending request to %s",
+                url.replace(f"api_key={str(api_key)}", "api_key=API_KEY"),
+            )
             if not url.startswith(("http:", "https:")):
                 msg = "URL must start with 'http:' or 'https:'"
-                logger.critical("%s but got %s", msg, url)
+                logger.critical(
+                    "%s but got %s",
+                    msg,
+                    url.replace(f"api_key={str(api_key)}", "api_key=API_KEY"),
+                )
                 raise ValueError(msg)
 
             try:
@@ -173,6 +223,8 @@ def fetch_results(
                     reset = e.headers.get("X-RateLimit-Reset")
                     reset_time = int(reset) if reset else None
                     raise APIRateLimitError(reset_time) from e
+                if e.code == 403:       # noqa: PLR2004
+                    raise APIRequestDailyLimitError() from e
                 error_msg = "Unknown error"
                 try:
                     error_data = json.loads(e.read().decode())

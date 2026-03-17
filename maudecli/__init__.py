@@ -11,8 +11,14 @@ import sys
 from pathlib import Path
 
 # Local imports
-from maudecli.api import fetch_results
+from maudecli.api import fetch_results, set_api_key
 from maudecli.db import build_database, database_exists, query_local_database
+from maudecli.errors import (
+    APIConnectionError,
+    APIRateLimitError,
+    APIRequestDailyLimitError,
+    APIResponseError,
+ )
 from maudecli.formatters import as_csv, as_org
 
 logger = logging.getLogger(__name__)
@@ -85,8 +91,18 @@ def main() -> None:
         default=3,
         help="Org heading level (default: 3)",
     )
+    parser.add_argument(
+        "-k", "--api-key",
+        type=str,
+        default=None,
+        help="API Key for the OpenFDA. Once provided, will save for future use.",
+    )
 
     args = parser.parse_args()
+
+    # Save the API Key if provided
+    if args.api_key:
+        set_api_key(args.api_key)
 
     # Process term groups into lists
     terms = [group.split(",") for group in args.term_groups]
@@ -100,20 +116,74 @@ def main() -> None:
     asyncio.run(build_database())
 
     # Fetch results from API
-    results = fetch_results(
-        *terms,
-        exclude_terms=exclude_terms,
-        search_fields=args.search_fields,
-        max_pages=args.max_pages,
-        limit=args.limit,
-        sort=args.sort,
-    )
+    try:
+        results = fetch_results(
+            *terms,
+            exclude_terms=exclude_terms,
+            search_fields=args.search_fields,
+            max_pages=args.max_pages,
+            limit=args.limit,
+            sort=args.sort,
+        )
+
+    except APIRateLimitError:
+        print(
+            "It looks you've exceeded the OpenFDA rate limit of"
+            " 240 requests per minute."
+            " Please go and make yourself a cup of tea and come back."
+            " More information can be found at:"
+            " https://open.fda.gov/apis/authentication/",
+        )
+        sys.exit(1)
+    except APIRequestDailyLimitError:
+        print(
+            "It looks like you (or someone on your IP address) has"
+            " exceeded the daily limit of 1,000 requests per day."
+            " It may be worth obtaining an API key from:"
+            " https://open.fda.gov/apis/authentication/"
+            "\nThis usually takes only a few minutes to come through."
+            " Once you have your API key, you can try again using the -k"
+            " command line flag followed by your API key. That is:"
+            '\nmaude-cli "SEARCH-TERM" -k "YOUR_API_KEY"'
+            "\nOnce you have used the -k or --api-key command the API key"
+            " will be saved for future use. To update it in the future"
+            " use the -k or --api-key command again.",
+        )
+        sys.exit(2)
+
+    except APIConnectionError as e:
+        print(
+            f"Couldn't connect to the openFDA API due to: {e}"
+            "\nConsider retrying your command.",
+        )
+        sys.exit(3)
+
+    except APIResponseError as e:
+        print(
+            f"An error has occurred when handling the API response: {e}"
+            "\nThere might be a problem with your command."
+            " If not, then please raise an issue at:"
+            " https://github.com/sbu-physics-mri/maude-cli/issues",
+        )
+        sys.exit(4)
+
+    except Exception as e:      # noqa: BLE001
+        print(
+            f"An unknown error has occurred: {e}"
+            "\nPlease raise an issue at:"
+            " https://github.com/sbu-physics-mri/maude-cli/issues",
+        )
+        sys.exit(5)
 
     # Also query local database for pre-2009 data if available
     if database_exists():
         logger.info("Querying local database for historical data...")
         # Use the first search field for local DB query
-        search_field = args.search_fields.split(",")[0] if "," in args.search_fields else args.search_fields
+        search_field = (
+            args.search_fields.split(",")[0]
+            if "," in args.search_fields
+            else args.search_fields
+        )
         # Map common API field names to local DB field names
         field_mapping = {
             "mdr_text.text": "foi_text",
@@ -121,7 +191,7 @@ def main() -> None:
             "device.brand_name": "brand_name",
         }
         local_field = field_mapping.get(search_field, search_field.split(".")[-1])
-        
+
         local_results = query_local_database(
             terms,
             exclude_terms=exclude_terms,
