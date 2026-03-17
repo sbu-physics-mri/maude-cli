@@ -160,7 +160,7 @@ def main() -> None:
 
     except APIResponseError as e:
         print(
-            f"An error has occured when handling the API response: {e}"
+            f"An error has occurred when handling the API response: {e}"
             "\nThere might be a problem with your command."
             " If not, then please raise an issue at:"
             " https://github.com/sbu-physics-mri/maude-cli/issues",
@@ -169,7 +169,7 @@ def main() -> None:
 
     except Exception as e:      # noqa: BLE001
         print(
-            f"An unknown error has occured: {e}"
+            f"An unknown error has occurred: {e}"
             "\nPlease raise an issue at:"
             " https://github.com/sbu-physics-mri/maude-cli/issues",
         )
