@@ -15,8 +15,12 @@ import urllib.request
 from typing import Generator, Iterable
 
 # Local imports
-from maudecli.errors import (APIConnectionError, APIRateLimitError,
-                             APIResponseError, CantConvertToStringError)
+from maudecli.errors import (
+    APIConnectionError,
+    APIRateLimitError,
+    APIResponseError,
+    CantConvertToStringError,
+)
 
 logger = logging.getLogger(__name__)
 
