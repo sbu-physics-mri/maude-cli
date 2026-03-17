@@ -129,7 +129,7 @@ def main() -> None:
     except APIRateLimitError:
         print(
             "It looks you've exceeded the OpenFDA rate limit of"
-            " 240 request per minute."
+            " 240 requests per minute."
             " Please go and make yourself a cup of tea and come back."
             " More information can be found at:"
             " https://open.fda.gov/apis/authentication/",
