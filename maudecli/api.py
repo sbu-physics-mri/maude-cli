@@ -51,9 +51,12 @@ def set_api_key(key: str) -> None:
 
     config["API"] = {"key": key}
 
-    _CONFIG_PATH.parent.mkdir(exist_ok=True)
+    # Ensure the configuration directory is only accessible by the user.
+    _CONFIG_PATH.parent.mkdir(mode=0o700, exist_ok=True)
     with _CONFIG_PATH.open("w") as configfile:
         config.write(configfile)
+    # Ensure the configuration file is only readable/writable by the user.
+    _CONFIG_PATH.chmod(0o600)
     logger.info("API Key saved to %s", _CONFIG_PATH.as_posix())
 
 
