@@ -11,7 +11,7 @@ import sys
 from pathlib import Path
 
 # Local imports
-from maudecli.api import fetch_results
+from maudecli.api import fetch_results, set_api_key
 from maudecli.db import build_database, database_exists, query_local_database
 from maudecli.formatters import as_csv, as_org
 
@@ -85,8 +85,18 @@ def main() -> None:
         default=3,
         help="Org heading level (default: 3)",
     )
+    parser.add_argument(
+        "-k", "--api-key",
+        type=str,
+        default=None,
+        help="API Key for the OpenFDA. Once provided, will save for future use.",
+    )
 
     args = parser.parse_args()
+
+    # Save the API Key if provided
+    if args.api_key:
+        set_api_key(args.api_key)
 
     # Process term groups into lists
     terms = [group.split(",") for group in args.term_groups]

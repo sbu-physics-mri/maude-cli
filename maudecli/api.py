@@ -131,6 +131,14 @@ def fetch_results(
         natively, so this implementation filters results after retrieval.
 
     """
+    # Load the API key
+    api_key = get_api_key()
+    base_endpoint = (
+        f"{base_endpoint}?api_key={api_key}&"
+        if api_key
+        else f"{base_endpoint}?"
+    )
+
     keywords = _validate_search_terms(terms)
     search_fields = (
         [search_fields]
@@ -141,7 +149,7 @@ def fetch_results(
     results = []
     pages = 0
     for sf in search_fields:
-        base_url = f"{base_endpoint}?search={sf}"
+        base_url = f"{base_endpoint}search={sf}"
         query = "+AND+".join(
             f"({'+OR+'.join(kw)})" for kw in keywords
         )
