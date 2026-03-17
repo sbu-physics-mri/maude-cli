@@ -70,6 +70,7 @@ maude-cli "MRI,MAGNET" "STAPES,TYMP"
 -   `-n, --name`: Field to use as item name (default: `report_number`)
 -   `-F, --fields`: Comma-separated fields to include in output
 -   `-L, --level`: Org heading level (default: 3)
+-   `-k, --api-key`: Set the API key to avoid open FDA daily request limits.
 
 
 ### Output Formats
