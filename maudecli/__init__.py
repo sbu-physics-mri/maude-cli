@@ -144,10 +144,10 @@ def main() -> None:
             "\nThis usually takes only a few minutes to come through."
             " Once you have your API key, you can try again using the -k"
             " command line flag followed by your API key. That is:"
-            "\nmaude-cli \"SEARCH-TERM\" -k \"YOUR_API_KEY\""
+            '\nmaude-cli "SEARCH-TERM" -k "YOUR_API_KEY"'
             "\nOnce you have used the -k or --api-key command the API key"
             " will be saved for future use. To update it in the future"
-            " use the -k or --api-key command again."
+            " use the -k or --api-key command again.",
         )
         sys.exit(2)
 
@@ -179,7 +179,11 @@ def main() -> None:
     if database_exists():
         logger.info("Querying local database for historical data...")
         # Use the first search field for local DB query
-        search_field = args.search_fields.split(",")[0] if "," in args.search_fields else args.search_fields
+        search_field = (
+            args.search_fields.split(",")[0]
+            if "," in args.search_fields
+            else args.search_fields
+        )
         # Map common API field names to local DB field names
         field_mapping = {
             "mdr_text.text": "foi_text",
@@ -187,7 +191,7 @@ def main() -> None:
             "device.brand_name": "brand_name",
         }
         local_field = field_mapping.get(search_field, search_field.split(".")[-1])
-        
+
         local_results = query_local_database(
             terms,
             exclude_terms=exclude_terms,
