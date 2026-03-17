@@ -173,6 +173,8 @@ def fetch_results(
                     reset = e.headers.get("X-RateLimit-Reset")
                     reset_time = int(reset) if reset else None
                     raise APIRateLimitError(reset_time) from e
+                if e.code == 403:       # noqa: PLR2004
+                    raise APIRequestDailyLimitError() from e
                 error_msg = "Unknown error"
                 try:
                     error_data = json.loads(e.read().decode())
