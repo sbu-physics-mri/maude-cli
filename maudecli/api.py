@@ -159,10 +159,17 @@ def fetch_results(
         )
 
         while url:
-            logger.debug("Sending request to %s", url)
+            logger.debug(
+                "Sending request to %s",
+                url.replace(f"api_key={str(api_key)}", "api_key=API_KEY"),
+            )
             if not url.startswith(("http:", "https:")):
                 msg = "URL must start with 'http:' or 'https:'"
-                logger.critical("%s but got %s", msg, url)
+                logger.critical(
+                    "%s but got %s",
+                    msg,
+                    url.replace(f"api_key={str(api_key)}", "api_key=API_KEY"),
+                )
                 raise ValueError(msg)
 
             try:
