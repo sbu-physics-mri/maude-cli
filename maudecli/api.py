@@ -9,20 +9,50 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
 # Python imports
+import configparser
 import json
 import logging
 import urllib.request
+from pathlib import Path
 from typing import Generator, Iterable
 
 # Local imports
 from maudecli.errors import (
     APIConnectionError,
     APIRateLimitError,
+    APIRequestDailyLimitError,
     APIResponseError,
     CantConvertToStringError,
 )
 
 logger = logging.getLogger(__name__)
+
+_CONFIG_PATH = Path.home() / ".maudecli" / "config.ini"
+
+def get_api_key() -> str | None:
+    """Get the API key - if set."""
+    config = configparser.ConfigParser()
+
+    if not _CONFIG_PATH.exists():
+        return None
+
+    config.read(_CONFIG_PATH)
+
+    if "API" in config:
+        return config["API"].get("key", None)
+    return None
+
+
+def set_api_key(key: str) -> None:
+    """Set the API key."""
+    config = configparser.ConfigParser()
+    config.read(_CONFIG_PATH)
+
+    config["API"] = {"key": key}
+
+    _CONFIG_PATH.parent.mkdir(exist_ok=True)
+    with _CONFIG_PATH.open("w") as configfile:
+        config.write(configfile)
 
 
 def construct_url(
