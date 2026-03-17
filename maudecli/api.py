@@ -15,6 +15,7 @@ import logging
 import urllib.request
 from pathlib import Path
 from typing import Generator, Iterable
+from urllib.parse import urlencode
 
 # Local imports
 from maudecli.errors import (
@@ -50,9 +51,12 @@ def set_api_key(key: str) -> None:
 
     config["API"] = {"key": key}
 
-    _CONFIG_PATH.parent.mkdir(exist_ok=True)
+    # Ensure the configuration directory is only accessible by the user.
+    _CONFIG_PATH.parent.mkdir(mode=0o700, exist_ok=True)
     with _CONFIG_PATH.open("w") as configfile:
         config.write(configfile)
+    # Ensure the configuration file is only readable/writable by the user.
+    _CONFIG_PATH.chmod(0o600)
     logger.info("API Key saved to %s", _CONFIG_PATH.as_posix())
 
 
@@ -135,7 +139,7 @@ def fetch_results(
     # Load the API key
     api_key = get_api_key()
     base_endpoint = (
-        f"{base_endpoint}?api_key={api_key}&"
+        f"{base_endpoint}?{urlencode({'api_key': api_key})}&"
         if api_key
         else f"{base_endpoint}?"
     )
