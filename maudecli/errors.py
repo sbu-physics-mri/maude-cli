@@ -27,6 +27,18 @@ class APIRateLimitError(Exception):
         super().__init__(message)
         self.reset_time = reset_time
 
+class APIRequestDailyLimitError(Exception):
+    """Number of daily requests has been exceeded."""
+
+    def __init__(self) -> None:
+        """Initialise the error."""
+        message = (
+            "Number of daily requests has been exceeded."
+            " Consider getting an API key to increase the number"
+            " of daily API requests at:"
+            " https://open.fda.gov/apis/authentication/"
+        )
+        super().__init__(message)
 
 class APIConnectionError(Exception):
     """Error connecting to the API."""
