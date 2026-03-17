@@ -15,6 +15,7 @@ import logging
 import urllib.request
 from pathlib import Path
 from typing import Generator, Iterable
+from urllib.parse import urlencode
 
 # Local imports
 from maudecli.errors import (
@@ -135,7 +136,7 @@ def fetch_results(
     # Load the API key
     api_key = get_api_key()
     base_endpoint = (
-        f"{base_endpoint}?api_key={api_key}&"
+        f"{base_endpoint}?{urlencode({'api_key': api_key})}&"
         if api_key
         else f"{base_endpoint}?"
     )
