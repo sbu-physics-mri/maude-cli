@@ -53,6 +53,7 @@ def set_api_key(key: str) -> None:
     _CONFIG_PATH.parent.mkdir(exist_ok=True)
     with _CONFIG_PATH.open("w") as configfile:
         config.write(configfile)
+    logger.info("API Key saved to %s", _CONFIG_PATH.as_posix())
 
 
 def construct_url(
